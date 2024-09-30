@@ -18,13 +18,13 @@ cree_fenetre(largeur_fenetre, hauteur_fenetre)
 taille_grille = 8
 
 # Calcule la taille de chaque case pour que le quadrillage soit un carré centré
-taille_case = min(hauteur_fenetre, largeur_fenetre) // taille_grille
+taille_case = min(hauteur_fenetre, largeur_fenetre) / taille_grille
 
 # Calcule l'espace à gauche et à droite pour centrer le quadrillage horizontalement
-marge_gauche_droite = (largeur_fenetre - (taille_case * taille_grille)) // 2
+marge_gauche_droite = (largeur_fenetre - (taille_case * taille_grille)) / 2
 
 # Calcule l'espace en haut et en bas pour centrer le quadrillage verticalement
-marge_haut_bas = (hauteur_fenetre - (taille_case * taille_grille)) // 2
+marge_haut_bas = (hauteur_fenetre - (taille_case * taille_grille)) / 2
 
 def dessine_quadrillage():
     # Dessine les lignes horizontales
