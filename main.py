@@ -10,27 +10,37 @@ def makeDict():
             dict[alphabetMaj[i] + str(j)] = "N"
     return dict
 
-
 # Création de la fenêtre
 largeur_fenetre, hauteur_fenetre = 1280, 720
 cree_fenetre(largeur_fenetre, hauteur_fenetre)
 
-def dessine_quadrillage(hauteur_ligne, largeur_colonne):
-    for i in range(1, 8):
-        y = i * hauteur_ligne
-        ligne(0, y, largeur_fenetre, y)
+# Taille du quadrillage (8x8)
+taille_grille = 8
 
-    for i in range(1, 8):
-        x = i * largeur_colonne
-        ligne(x, 0, x, hauteur_fenetre)
+# Calcule la taille de chaque case pour que le quadrillage soit un carré centré
+taille_case = min(hauteur_fenetre, largeur_fenetre) // taille_grille
 
-# Appel de la fonction avec les bonnes dimensions
-dessine_quadrillage(hauteur_fenetre // 8, largeur_fenetre // 8)
+# Calcule l'espace à gauche et à droite pour centrer le quadrillage horizontalement
+marge_gauche_droite = (largeur_fenetre - (taille_case * taille_grille)) // 2
+
+# Calcule l'espace en haut et en bas pour centrer le quadrillage verticalement
+marge_haut_bas = (hauteur_fenetre - (taille_case * taille_grille)) // 2
+
+def dessine_quadrillage():
+    # Dessine les lignes horizontales
+    for i in range(taille_grille + 1):
+        y = marge_haut_bas + i * taille_case
+        ligne(marge_gauche_droite, y, largeur_fenetre - marge_gauche_droite, y)
+
+    # Dessine les lignes verticales
+    for i in range(taille_grille + 1):
+        x = marge_gauche_droite + i * taille_case
+        ligne(x, marge_haut_bas, x, hauteur_fenetre - marge_haut_bas)
+
+# Appel de la fonction pour dessiner le quadrillage centré
+dessine_quadrillage()
 
 # Attente d'un événement pour fermer la fenêtre
-
-
-
 while True:
     ev = donne_ev()
     tev = type_ev(ev)
