@@ -17,22 +17,24 @@ cree_fenetre(largeur_fenetre, hauteur_fenetre)
 # Taille du quadrillage (8x8)
 taille_grille = 8
 
-# On réduit légèrement la taille des cases pour qu'elles rentrent bien dans la fenêtre
-taille_case = (hauteur_fenetre - 2) // taille_grille  # -2 pour laisser un peu d'espace
+# On réduit légèrement la taille des cases pour éviter les débordements
+taille_case = (hauteur_fenetre) // taille_grille
 
-# Calcule l'espace à gauche et à droite pour centrer le quadrillage horizontalement
+# Calcule l'espace à gauche pour centrer le quadrillage horizontalement
 marge_gauche_droite = (largeur_fenetre - (taille_case * taille_grille)) // 2
 
 def dessine_quadrillage():
-    # Dessine les lignes horizontales (sans marge en haut et en bas)
+    # Dessine les lignes horizontales (exactement 8 lignes)
     for i in range(taille_grille + 1):
         y = i * taille_case
-        ligne(marge_gauche_droite, y, largeur_fenetre - marge_gauche_droite, y)
+        if y <= hauteur_fenetre:  # S'assurer de ne pas dépasser la fenêtre
+            ligne(marge_gauche_droite, y, largeur_fenetre - marge_gauche_droite, y)
 
-    # Dessine les lignes verticales (centrées horizontalement)
+    # Dessine les lignes verticales (exactement 8 colonnes)
     for i in range(taille_grille + 1):
         x = marge_gauche_droite + i * taille_case
-        ligne(x, 0, x, hauteur_fenetre)
+        if x <= largeur_fenetre:  # S'assurer de ne pas dépasser la fenêtre
+            ligne(x, 0, x, taille_case * taille_grille)  # Utilise juste la hauteur nécessaire pour le quadrillage
 
 # Appel de la fonction pour dessiner le quadrillage centré
 dessine_quadrillage()
