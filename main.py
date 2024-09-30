@@ -17,8 +17,8 @@ cree_fenetre(largeur_fenetre, hauteur_fenetre)
 # Taille du quadrillage (8x8)
 taille_grille = 8
 
-# On utilise toute la hauteur de la fenêtre pour le quadrillage
-taille_case = hauteur_fenetre // taille_grille
+# On réduit légèrement la taille des cases pour qu'elles rentrent bien dans la fenêtre
+taille_case = (hauteur_fenetre - 2) // taille_grille  # -2 pour laisser un peu d'espace
 
 # Calcule l'espace à gauche et à droite pour centrer le quadrillage horizontalement
 marge_gauche_droite = (largeur_fenetre - (taille_case * taille_grille)) // 2
