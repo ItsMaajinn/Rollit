@@ -127,7 +127,7 @@ class CustomCanvas:
         self.root.resizable(width=resizing, height=resizing)
         self.canvas.focus_set()
         self.first_resize = True
-        self.root.title("BITMAP MULTITOOL")
+        self.root.title("ROLLIT PROJECT")
 
         # binding events
         self.ev_queue: Deque[FltkEvent] = deque()
