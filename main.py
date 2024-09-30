@@ -12,7 +12,7 @@ def makeDict():
 
 
 # Création de la fenêtre
-largeur_fenetre, hauteur_fenetre = 1024, 720
+largeur_fenetre, hauteur_fenetre = 1280, 720
 cree_fenetre(largeur_fenetre, hauteur_fenetre)
 
 def dessine_quadrillage(hauteur_ligne, largeur_colonne):
