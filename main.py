@@ -12,10 +12,10 @@ def createGrid():
     for i in range(8):  # Pour les rangées de A à H
         row = []
         for j in range(8):  # Pour les colonnes de 1 à 8
-            col = chr(ord('A') + i)
-            row_num = j + 1
+            col = chr(ord('A') + j)  # Ajuster pour A à droite
+            row_num = 8 - i  # Ajuster pour 8 à 1
             x1 = 280 + j * 90
-            y1 = 0 + i * 90
+            y1 = i * 90
             x2 = x1 + 90
             y2 = y1 + 90
             cell_name = f"{col}{row_num}"
@@ -25,9 +25,22 @@ def createGrid():
     return grid
 
 
+def coordToCase(tab, ev):
+    x, y = abscisse(ev), ordonnee(ev)
+
+    if 280 <= x <= 1000 and 0 <= y <= 720:
+        for i in range(8):
+            for j in range(8):
+                cell_name, (x1, y1, x2, y2) = tab[i][j]
+                if x1 <= x <= x2 and y1 <= y <= y2:
+                    return cell_name
+
+    return ""
+
+
 def poserBoule():
     imgRouge = "assets/Ruby.png"
-    image(322, 45, imgRouge, largeur=90, hauteur=90, ancrage="center")
+    image(322, 45, imgRouge, largeur=90, hauteur=90, ancrage="center")  # Placer l'image en haut
 
 
 # Création de la fenêtre
@@ -65,25 +78,20 @@ dessine_quadrillage()
 poserBoule()
 
 # Utilisation de la nouvelle fonction
-grid_with_coords = createGrid()
-print(grid_with_coords)
 
 # Attente d'un événement pour fermer la fenêtre
 while True:
     ev = donne_ev()
     tev = type_ev(ev)
 
-    # Détecter et traiter l'événement dans detectCase
-    """case_detectee = detectCase(ev, createDict())
-    if case_detectee:
-        print("Case détectée:", case_detectee)"""
-
-    # Action dépendant du type d'événement reçu
+    # Détecter et traiter l'événement dans coordToCase
     if tev == 'Touche':
         print('Appui sur la touche', touche(ev))
     elif tev == "ClicDroit":
         print("Clic droit au point", (abscisse(ev), ordonnee(ev)))
     elif tev == "ClicGauche":
+        detected_case = coordToCase(createGrid(), ev)
+        print("Case cliquée:", detected_case)
         print("Clic gauche au point", (abscisse(ev), ordonnee(ev)))
     elif tev == 'Quitte':  # on sort de la boucle
         break
