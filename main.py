@@ -21,13 +21,11 @@ def createGrid():
             cell_name = f"{col}{row_num}"
             row.append([cell_name, (x1, y1, x2, y2)])
         grid.append(row)
-
     return grid
 
 
 def coordToCase(tab, ev):
     x, y = abscisse(ev), ordonnee(ev)
-
     if 280 <= x <= 1000 and 0 <= y <= 720:
         for i in range(8):
             for j in range(8):
@@ -35,7 +33,12 @@ def coordToCase(tab, ev):
                 if x1 <= x <= x2 and y1 <= y <= y2:
                     return cell_name
 
-    return ""
+
+def caseToCoord(var, tab):
+    for i in range(8):
+        for j in range(8):
+            if tab[i][j][0] == var:
+                return tab[i][j][1]
 
 
 def poserBoule():
@@ -64,13 +67,12 @@ def dessine_quadrillage():
         y = i * taille_case + (marge_supplementaire // 2)  # Ajouter la marge supplémentaire en haut
         if y <= hauteur_fenetre:  # S'assurer de ne pas dépasser la fenêtre
             ligne(marge_gauche_droite, y, largeur_fenetre - marge_gauche_droite, y)
-
     # Dessine les lignes verticales (exactement 8 colonnes)
     for i in range(taille_grille + 1):
         x = marge_gauche_droite + i * taille_case
         if x <= largeur_fenetre:  # S'assurer de ne pas dépasser la fenêtre
             ligne(x, (marge_supplementaire // 2), x, (taille_case * taille_grille) + (
-                    marge_supplementaire // 2))  # Utilise juste la hauteur nécessaire pour le quadrillage
+                        marge_supplementaire // 2))  # Utilise juste la hauteur nécessaire pour le quadrillage
 
 
 # Appel de la fonction pour dessiner le quadrillage centré
@@ -84,14 +86,15 @@ while True:
     ev = donne_ev()
     tev = type_ev(ev)
 
-    # Détecter et traiter l'événement dans coordToCase
     if tev == 'Touche':
         print('Appui sur la touche', touche(ev))
     elif tev == "ClicDroit":
         print("Clic droit au point", (abscisse(ev), ordonnee(ev)))
     elif tev == "ClicGauche":
-        detected_case = coordToCase(createGrid(), ev)
-        print("Case cliquée:", detected_case)
+        grid = createGrid()
+        cell_name = coordToCase(grid, ev)
+        print(cell_name)
+        print(caseToCoord(cell_name, grid))
         print("Clic gauche au point", (abscisse(ev), ordonnee(ev)))
     elif tev == 'Quitte':  # on sort de la boucle
         break
