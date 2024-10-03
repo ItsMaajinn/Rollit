@@ -44,7 +44,9 @@ def caseToCoord(var, tab):
 def poserBoule():
     imgRouge = "assets/Ruby.png"
     image(322, 45, imgRouge, largeur=90, hauteur=90, ancrage="center")  # Placer l'image en haut
-
+    image(412, 135, imgRouge, largeur=90, hauteur=90, ancrage="center")
+    # pour x => ((x1+x2))//2)-3
+    # pour y => (y1+y2)//2
 
 # Création de la fenêtre
 marge_supplementaire = 4  # Marge supplémentaire pour le haut et le bas
