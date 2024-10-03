@@ -1,33 +1,33 @@
 import string
 from fltk import *
 
-alphabetMaj = string.ascii_uppercase
+
+def createGrid():
+    """
+    Crée une grille de coordonnées sous forme de liste de listes.
+    Chaque entrée est un tuple contenant le nom de la case et ses coordonnées.
+    :return: grille (liste de listes de tuples)
+    """
+    grid = []
+    for i in range(8):  # Pour les rangées de A à H
+        row = []
+        for j in range(8):  # Pour les colonnes de 1 à 8
+            col = chr(ord('A') + i)
+            row_num = j + 1
+            x1 = 280 + j * 90
+            y1 = 0 + i * 90
+            x2 = x1 + 90
+            y2 = y1 + 90
+            cell_name = f"{col}{row_num}"
+            row.append([cell_name, (x1, y1, x2, y2)])
+        grid.append(row)
+
+    return grid
 
 
-def dictCode(alphabet):
-    d = {}
-    for i in range(8):
-        d[alphabet[i]] = []
-        for j in range(1, 9):
-            d[alphabet[i]].append(alphabet[i] + str(j))
-    return d
-
-
-def detectCase(ev, d, alphabet):
-    tev = type_ev(ev)
-
-    if tev == "ClicGauche":
-        taille_case = 90
-        x1 = 280
-        y1 = 0
-
-        x, y = abscisse(ev), ordonnee(ev)
-        if x1 <= x < x1 + 8 * taille_case and y1 <= y < y1 + 8 * taille_case:
-            col = (x - x1) // taille_case
-            row = 7 - (y - y1) // taille_case
-            key = alphabet[col]
-            return d[key][row]
-
+def poserBoule():
+    imgRouge = "assets/Ruby.png"
+    image(322, 45, imgRouge, largeur=90, hauteur=90, ancrage="center")
 
 
 # Création de la fenêtre
@@ -62,6 +62,11 @@ def dessine_quadrillage():
 
 # Appel de la fonction pour dessiner le quadrillage centré
 dessine_quadrillage()
+poserBoule()
+
+# Utilisation de la nouvelle fonction
+grid_with_coords = createGrid()
+print(grid_with_coords)
 
 # Attente d'un événement pour fermer la fenêtre
 while True:
@@ -69,9 +74,9 @@ while True:
     tev = type_ev(ev)
 
     # Détecter et traiter l'événement dans detectCase
-    case_detectee = detectCase(ev, dictCode(alphabetMaj), alphabetMaj)
+    """case_detectee = detectCase(ev, createDict())
     if case_detectee:
-        print("Case détectée:", case_detectee)
+        print("Case détectée:", case_detectee)"""
 
     # Action dépendant du type d'événement reçu
     if tev == 'Touche':
