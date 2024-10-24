@@ -42,7 +42,7 @@ def caseToCoord(var, tab):
                 return tab[i][j][1]
     return None
 
-def poserBoule(cell_coords, image_path="assets/Ruby.png"):
+def poserBoule(cell_coords, image_path):
     """
     Ajoute une boule (image) à la liste des boules à poser.
     L'image sera dessinée au centre de la case.
@@ -115,7 +115,7 @@ def gerer_evenement_clic_gauche(ev):
         cell_coords = caseToCoord(cell_name, grid)
         print(f"Clic gauche sur la case {cell_name} avec coordonnées {cell_coords}")
         # Définir le chemin de l'image à poser, vous pouvez le modifier selon vos besoins
-        chemin_image = "assets/Ruby.png"  # Remplacez par le chemin de votre image
+        chemin_image = "assets/pionBleu.png"  # Remplacez par le chemin de votre image
         poserBoule(cell_coords, chemin_image)
         redraw()
     else:
