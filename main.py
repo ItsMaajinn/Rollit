@@ -4,9 +4,12 @@ from fltk import *
 # Liste pour stocker les positions des boules (images) à afficher
 boules = []
 
+# Dictionnaire global pour stocker les cases par leur nom
+case_dict = {}
+
 def createGrid():
     """
-    Crée une grille de coordonnées sous forme de liste de listes.
+    Crée une grille de coordonnées et remplit un dictionnaire global pour un accès rapide.
     Chaque entrée est un tuple contenant le nom de la case et ses coordonnées.
     :return: grille (liste de listes de tuples)
     """
@@ -21,7 +24,15 @@ def createGrid():
             x2 = x1 + taille_case
             y2 = y1 + taille_case
             cell_name = f"{col}{row_num}"
-            row.append([cell_name, (x1, y1, x2, y2)])
+            cell_info = [cell_name, (x1, y1, x2, y2)]
+            row.append(cell_info)
+            # Ajouter au dictionnaire
+            case_dict[cell_name] = {
+                "nom": cell_name,
+                "coordonnees": (x1, y1, x2, y2),
+                "completion": None,
+                "cote": None
+            }
         grid.append(row)
     return grid
 
@@ -42,6 +53,29 @@ def caseToCoord(var, tab):
                 return tab[i][j][1]
     return None
 
+
+def get_case(nameCase):
+    """
+    Retourne les informations d'une case à partir du dictionnaire global.
+
+    :param nameCase: Le nom de la case (ex: "A1")
+    :return: Un dictionnaire contenant les informations de la case, ou None si elle n'existe pas
+    """
+    return case_dict.get(nameCase)
+
+
+# Exemple d'utilisation
+case_info = get_case("C5")
+if case_info:
+    print(case_info)
+
+
+# Exemple d'utilisation
+case_info = get_case("C5")
+if case_info:
+    print(case_info)
+
+
 def poserBoule(cell_coords, image_path):
     """
     Ajoute une boule (image) à la liste des boules à poser.
@@ -61,6 +95,7 @@ def dessineBoules():
     for boule in boules:
         x, y, path = boule
         image(x, y, path, largeur=taille_case, hauteur=taille_case, ancrage="center")
+        get_case(coordToCase(grid, ev))["completion"] = path
 
 def dessine_quadrillage():
     # Dessine les lignes horizontales (exactement 9 lignes pour 8 cases)
@@ -113,6 +148,7 @@ def gerer_evenement_clic_gauche(ev):
     cell_name = coordToCase(grid, ev)
     if cell_name:
         cell_coords = caseToCoord(cell_name, grid)
+        print(f"{get_case(cell_name)}")
         print(f"Clic gauche sur la case {cell_name} avec coordonnées {cell_coords}")
         # Définir le chemin de l'image à poser, vous pouvez le modifier selon vos besoins
         chemin_image = "assets/pionBleu.png"  # Remplacez par le chemin de votre image
