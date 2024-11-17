@@ -1,0 +1,215 @@
+import random
+
+plateau = [[None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None], 
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None]]
+
+
+
+def creation_roles(plateau):
+    """
+    Fonction pour définir le nombre de joueurs et leurs attribuer une couleur.
+    
+    args :
+        plateau(list) : matrice correspondant au plateau de jeu
+    
+    retourne le dictionnaire joueurs, la variable nb_joueurs et la liste plateau
+    """
+    nb_joueurs = int(input('Nombre de joueurs (1 à 4) : '))
+    joueurs= {}
+    
+    if nb_joueurs == 1 :
+        joueurs['j1'] = 'R'
+        joueurs['jORDI'] = 'V'
+        plateau[3][3] = 'R'
+        plateau[4][4] = 'V'
+        #faire en automatique donc contre ordi (random)
+        
+    elif nb_joueurs == 2 :
+        joueurs['j1'] = 'R'
+        joueurs['j2'] = 'V'
+        plateau[3][3] = 'R'
+        plateau[4][4] = 'V'
+        
+    elif nb_joueurs == 3 :
+        joueurs['j1'] = 'R'
+        joueurs['j2'] = 'J'
+        joueurs['j3'] = 'V'
+        plateau[3][3] = 'R'
+        plateau[3][4] = 'J'
+        plateau[4][4] = 'V'
+        
+    elif nb_joueurs == 4 :
+        joueurs['j1'] = 'R'
+        joueurs['j2'] = 'J'
+        joueurs['j3'] = 'V'
+        joueurs['j4'] = 'B'
+        plateau[3][3] = 'R'
+        plateau[3][4] = 'J'
+        plateau[4][3] = 'B'
+        plateau[4][4] = 'V'
+        
+    else :
+        print('Seulement 1 à 4 joueurs possible')
+    print(joueurs)
+    for liste in plateau :
+        print(liste)
+    return joueurs, nb_joueurs, plateau
+
+
+
+def demander_placement():
+    """
+    Fonction pour choisir l'emplacement de la boule.
+    
+    retourne les variables ligne et colonne
+    """
+    ligne = int(input('Ligne (entre 1 et 8) : '))-1
+    colonne = int(input('Colonne (entre 1 et 8) : '))-1
+    return ligne, colonne
+
+
+
+def placer_boule(jT,joueurs,plateau,ligne,colonne):
+    """
+    Fonction pour placer la boule sur le plateau.
+    
+    args :
+        jT(str) : le joueur qui pose la boule
+        joueurs(dict) : tous les joueurs avec leur couleur associée
+        plateau(list) : matrice correspondant au plateau de jeu
+        ligne(int) : emplacement choisi par le joueur
+        colonne(int) : emplacement choisi par le joueur
+    
+    """
+    
+    if plateau[ligne - 1][colonne] is not None : #s'il y a une boule au dessus de l'emplacement désiré
+        plateau[ligne][colonne] = joueurs[jT]
+        
+    elif plateau[ligne + 1][colonne] is not None : #s'il y a une boule en dessous de l'emplacement désiré
+        plateau[ligne][colonne] = joueurs[jT]
+    
+    elif plateau[ligne][colonne - 1] is not None : #s'il y a une boule à gauche de l'emplacement désiré
+        plateau[ligne][colonne] = joueurs[jT]
+    
+    elif plateau[ligne][colonne + 1] is not None : #s'il y a une boule à droite de l'emplacement désiré
+        plateau[ligne][colonne] = joueurs[jT]
+
+    elif plateau[ligne - 1][colonne - 1] is not None : #s'il y a une boule dans la diagonale en haut à gauche de l'emplacement désiré
+        plateau[ligne][colonne] = joueurs[jT]
+        
+    elif plateau[ligne + 1][colonne - 1] is not None : #s'il y a une boule dans la diagonale en bas à gauche de l'emplacement désiré
+        plateau[ligne][colonne] = joueurs[jT]
+    
+    elif plateau[ligne - 1][colonne + 1] is not None : #s'il y a une boule dans la diagonale en haut à droite de l'emplacement désiré
+        plateau[ligne][colonne] = joueurs[jT]
+    
+    elif plateau[ligne + 1][colonne + 1] is not None : #s'il y a une boule dans la diagonale en bas à droite de l'emplacement désiré
+        plateau[ligne][colonne] = joueurs[jT]
+        
+    else :
+        print('Pas possible : aucune boule à proximité')
+
+
+
+def verif_encadre(plateau):
+    """
+    Fonction pour changer les couleur des boules sur le plateau si elles sont encadrées.
+    
+    args :
+        plateau(list) : matrice correspondant au plateau de jeu
+    """
+    for ligne in range(len(plateau)):
+        for colonne in range(len(plateau[ligne])):
+            if plateau[ligne][colonne] is not None: 
+                
+                if 0 < ligne < 7 : #on verifie qu'il n'y a pas d'indice out of range
+                    #s'il y a un encadrement avec la boule du dessus et du dessous
+                    if plateau[ligne - 1][colonne] == plateau[ligne + 1][colonne] and plateau[ligne - 1][colonne] is not None:
+                        plateau[ligne][colonne] = plateau[ligne - 1][colonne]
+                
+                if 0 < colonne < 7:
+                    #s'il y a un encadrement avec la boule de gauche et de droite
+                    if plateau[ligne][colonne - 1] == plateau[ligne][colonne + 1] and plateau[ligne][colonne - 1] is not None:
+                        plateau[ligne][colonne] = plateau[ligne][colonne - 1]
+                
+                if 0 < ligne < 7 and 0 < colonne < 7 :
+                    #s'il y a un encadrement avec les boules dans la diagonale de gauche à droite
+                    if plateau[ligne - 1][colonne - 1] == plateau[ligne + 1][colonne + 1] and plateau[ligne - 1][colonne - 1] is not None:
+                        plateau[ligne][colonne] = plateau[ligne - 1][colonne - 1]
+                
+                if 0 < ligne < 7 and 0 < colonne < 7 :
+                    #s'il y a un encadrement avec les boules dans la diagonale de droite à gauche
+                    if plateau[ligne - 1][colonne + 1] == plateau[ligne + 1][colonne - 1] and plateau[ligne - 1][colonne + 1] is not None:
+                        plateau[ligne][colonne] = plateau[ligne - 1][colonne + 1]
+
+
+def calc_score(plateau):
+    """
+    Fonction pour calculer les scores de chaque joueurs une fois le jeu terminé.
+    
+    args :
+        plateau(list) : matrice correspondant au plateau de jeu
+    """
+    scoreR = 0
+    scoreJ = 0
+    scoreB = 0
+    scoreV = 0 
+    
+    for ligne in plateau :
+        for color in ligne :
+            if color == 'R':
+                scoreR += 1
+            elif color == 'J':
+                scoreJ += 1
+            elif color == 'B':
+                scoreB += 1
+            elif color == 'V':
+                scoreV += 1
+                
+    if scoreR > 0 :
+        print("Score joueur rouge : " + str(scoreR))
+    if scoreJ > 0 :
+        print("Score joueur jaune : " + str(scoreJ))
+    if scoreB > 0 :
+        print("Score joueur bleu : " + str(scoreB))
+    if scoreV > 0 :
+        print("Score joueur vert : " + str(scoreV))
+    
+
+
+
+def main(plateau):
+    """
+    Fonction principale qui exécute toutes les autres fonctions créées pour le déroulement du jeu.
+    
+    args :
+        plateau(list) : matrice correspondant au plateau de jeu
+    """
+    compteur = 1
+    joueurs, nb_joueurs, plateau = creation_roles(plateau)
+    
+    while any(None in ligne for ligne in plateau) : #tant que toutes les cases du plateau ne sont pas remplies
+        
+        while compteur != nb_joueurs+1 :
+            
+            ligne, colonne = demander_placement()
+            placer_boule("".join(('j',str(compteur))),joueurs,plateau,ligne,colonne)
+            verif_encadre(plateau)
+            compteur += 1
+            
+            for liste in plateau:
+                print(liste)
+             
+        compteur = 1
+    
+    calc_score(plateau)
+        
+        
+if __name__ == "__main__":
+    main(plateau)
