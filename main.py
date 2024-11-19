@@ -36,15 +36,22 @@ def createGrid():
         grid.append(row)
     return grid
 
+
 def coordToCase(tab, ev):
+    # Récupère les coordonnées x et y de l'événement
     x, y = abscisse(ev), ordonnee(ev)
+    # Vérifie si les coordonnées x et y sont dans les limites de la grille
     if marge_gauche_droite <= x <= (marge_gauche_droite + taille_case * 8) and (marge_supplementaire // 2) <= y <= (marge_supplementaire // 2 + taille_case * 8):
-        for i in range(8):
-            for j in range(8):
-                cell_name, (x1, y1, x2, y2) = tab[i][j]
-                if x1 <= x <= x2 and y1 <= y <= y2:
-                    return cell_name
+        # Calcule la colonne en fonction de la position x
+        col = (x - marge_gauche_droite) // taille_case
+        # Calcule la ligne en fonction de la position y
+        row = (y - (marge_supplementaire // 2)) // taille_case
+        # Retourne le nom de la case correspondante
+        return tab[row][col][0]
+
+    # Retourne None si les coordonnées ne sont pas dans les limites de la grille
     return None
+
 
 def caseToCoord(var, tab):
     for i in range(8):
@@ -62,19 +69,6 @@ def get_case(nameCase):
     :return: Un dictionnaire contenant les informations de la case, ou None si elle n'existe pas
     """
     return case_dict.get(nameCase)
-
-
-# Exemple d'utilisation
-case_info = get_case("C5")
-if case_info:
-    print(case_info)
-
-
-# Exemple d'utilisation
-case_info = get_case("C5")
-if case_info:
-    print(case_info)
-
 
 def poserBoule(cell_coords, image_path):
     """
