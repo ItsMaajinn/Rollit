@@ -1,9 +1,12 @@
 from fltk import *
+import wx
 
 # Choix Nombre Joueurs
 
+a = wx.App()  # Crée une instance
+nbJoueurs = wx.GetTextFromUser("Nombre de joueurs (entre 2 et 4)")
 
-
+#Jeu Offline All Humans
 
 
 
@@ -132,16 +135,35 @@ def bouleNextTo(grid, coordRel, taille_case, marge_gauche_droite):
 
 
 
+def game(nbJoueurs, marge_gauche_droite, taille_case, taille_grille):
+    grid = createGrid(marge_gauche_droite, taille_case)
+    dessine_quadrillage(taille_grille, taille_case, marge_gauche_droite)
+    nbJoueurs = int(nbJoueurs)
 
+    # Center coordinates
+    center_row, center_col = taille_grille // 2, taille_grille // 2
 
+    # Coordinates for placing boules around the center
+    positions = [
+        (center_row, center_col),  # Center
+        (center_row, center_col - 1),  # Left of center
+        (center_row - 1, center_col),  # Above center
+        (center_row - 1, center_col - 1)  # Top-left of center
+    ]
 
-"""def gerer_evenement_clic_gauche(ev):
-    cell_coord = coordToCase(grid, ev)
-    if cell_coord:
-        """
+    # Boule paths
+    boule_paths = ["assets/pionRouge.png", "assets/pionJaune.png"]
+    if nbJoueurs >= 3:
+        boule_paths.append("assets/pionBleu.png")
+    if nbJoueurs == 4:
+        boule_paths.append("assets/pionVert.png")
 
+    # Place boules at the center based on the number of players
+    for i in range(nbJoueurs):
+        row, col = positions[i]
+        placerBoule(grid, taille_case, marge_gauche_droite, grid[row][col][0], boule_paths[i], grid[row][col])
 
-
+    return grid
 
 # Var et main
 
@@ -154,17 +176,7 @@ taille_case = (hauteur_fenetre - marge_supplementaire) // taille_grille
 # Calcule l'espace à gauche pour centrer le quadrillage horizontalement
 marge_gauche_droite = (largeur_fenetre - (taille_case * taille_grille)) // 2
 
-grid = createGrid(marge_gauche_droite, taille_case)
-dessine_quadrillage(taille_grille, taille_case, marge_gauche_droite)
-
-
-
-center_row, center_col = taille_grille // 2, taille_grille // 2
-center_coords = grid[center_row][center_col][0]
-
-center_path = changeColor("assets/pionBleu.png", "assets/pionRouge.png", "assets/pionJaune.png", "assets/pionVert.png")
-placerBoule(grid, taille_case, marge_gauche_droite, center_coords, center_path, grid[center_row][center_col])
-
+grid = game(nbJoueurs, marge_gauche_droite, taille_case, taille_grille)
 
 while True:
     ev = donne_ev()
@@ -176,6 +188,5 @@ while True:
         case = getCase(grid, (abscisse(ev), ordonnee(ev)), taille_case, marge_gauche_droite)
         if case and case[1] == None:  # Vérifie si la case est valide
             if bouleNextTo(grid, (abscisse(ev), ordonnee(ev)), taille_case, marge_gauche_droite):
-                path = changeColor("assets/pionBleu.png", "assets/pionRouge.png", "assets/pionJaune.png", "assets/pionVert.png")
-                placerBoule(grid, taille_case, marge_gauche_droite, case[0], path, case)
+                placerBoule(grid, taille_case, marge_gauche_droite, case[0], "assets/pionBleu.png", case)
     mise_a_jour()
