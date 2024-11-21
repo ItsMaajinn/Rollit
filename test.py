@@ -109,8 +109,17 @@ def changeColor(path1, path2, path3, path4):
     constanteColor += 1  # Incrémente i après chaque appel
     return path
 
-def bouleNextTo(cell_cords)
-
+def bouleNextTo(grid):
+    """
+    Renvoie une grille contenant uniquement l'état de completion de chaque case.
+    :param grid: la grille originale contenant les informations des cases
+    :return: une nouvelle grille avec uniquement l'état de completion
+    """
+    completion_grid = []
+    for row in grid:
+        completion_row = [cell[1] for cell in row]
+        completion_grid.append(completion_row)
+    return completion_grid
 
 
 """def gerer_evenement_clic_gauche(ev):
@@ -134,6 +143,7 @@ marge_gauche_droite = (largeur_fenetre - (taille_case * taille_grille)) // 2
 
 grid = createGrid(marge_gauche_droite, taille_case)
 dessine_quadrillage(taille_grille, taille_case, marge_gauche_droite)
+print(bouleNextTo(grid))
 
 while True:
     ev = donne_ev()
