@@ -109,17 +109,23 @@ def changeColor(path1, path2, path3, path4):
     constanteColor += 1  # Incrémente i après chaque appel
     return path
 
-def bouleNextTo(grid):
-    """
-    Renvoie une grille contenant uniquement l'état de completion de chaque case.
-    :param grid: la grille originale contenant les informations des cases
-    :return: une nouvelle grille avec uniquement l'état de completion
-    """
-    completion_grid = []
-    for row in grid:
-        completion_row = [cell[1] for cell in row]
-        completion_grid.append(completion_row)
-    return completion_grid
+def bouleNextTo(grid, coordRel, taille_case, marge_gauche_droite):
+    x, y = coordRel  # Decompose the coordinates
+    possibilities = [
+        (x - taille_case, y), (x + taille_case, y),
+        (x, y - taille_case), (x, y + taille_case),
+        (x - taille_case, y - taille_case), (x + taille_case, y - taille_case),
+        (x - taille_case, y + taille_case), (x + taille_case, y + taille_case)
+    ]
+    for i in possibilities:
+        case = getCase(grid, i, taille_case, marge_gauche_droite)
+        if case is not None and case[1] is not None:
+            return True
+    return False
+
+
+
+
 
 
 """def gerer_evenement_clic_gauche(ev):
@@ -143,7 +149,12 @@ marge_gauche_droite = (largeur_fenetre - (taille_case * taille_grille)) // 2
 
 grid = createGrid(marge_gauche_droite, taille_case)
 dessine_quadrillage(taille_grille, taille_case, marge_gauche_droite)
-print(bouleNextTo(grid))
+center_row, center_col = taille_grille // 2, taille_grille // 2
+center_coords = grid[center_row][center_col][0]
+
+center_path = changeColor("assets/pionBleu.png", "assets/pionRouge.png", "assets/pionJaune.png", "assets/pionVert.png")
+placerBoule(grid, taille_case, marge_gauche_droite, center_coords, center_path, grid[center_row][center_col])
+
 
 while True:
     ev = donne_ev()
@@ -154,8 +165,7 @@ while True:
     elif tev == 'ClicGauche':
         case = getCase(grid, (abscisse(ev), ordonnee(ev)), taille_case, marge_gauche_droite)
         if case and case[1] == None:  # Vérifie si la case est valide
-            path = changeColor("assets/pionBleu.png", "assets/pionRouge.png", "assets/pionJaune.png", "assets/pionVert.png")
-            placerBoule(grid, taille_case, marge_gauche_droite, case[0], path, case)
-            print(case)
-
+            if bouleNextTo(grid, (abscisse(ev), ordonnee(ev)), taille_case, marge_gauche_droite):
+                path = changeColor("assets/pionBleu.png", "assets/pionRouge.png", "assets/pionJaune.png", "assets/pionVert.png")
+                placerBoule(grid, taille_case, marge_gauche_droite, case[0], path, case)
     mise_a_jour()
