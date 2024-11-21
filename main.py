@@ -1,97 +1,24 @@
-import string
 from fltk import *
 
-# Liste pour stocker les positions des boules (images) à afficher
+# Choix Nombre Joueurs
+
+
+
+
+
+
 boules = []
 
-# Dictionnaire global pour stocker les cases par leur nom
-case_dict = {}
-
-def createGrid():
-    """
-    Crée une grille de coordonnées et remplit un dictionnaire global pour un accès rapide.
-    Chaque entrée est un tuple contenant le nom de la case et ses coordonnées.
-    :return: grille (liste de listes de tuples)
-    """
-    grid = []
-    for i in range(8):  # Pour les rangées de A à H
-        row = []
-        for j in range(8):  # Pour les colonnes de 1 à 8
-            col = chr(ord('A') + j)  # Ajuster pour A à H
-            row_num = 8 - i  # Ajuster pour 8 à 1
-            x1 = marge_gauche_droite + j * taille_case
-            y1 = (marge_supplementaire // 2) + i * taille_case
-            x2 = x1 + taille_case
-            y2 = y1 + taille_case
-            cell_name = f"{col}{row_num}"
-            cell_info = [cell_name, (x1, y1, x2, y2)]
-            row.append(cell_info)
-            # Ajouter au dictionnaire
-            case_dict[cell_name] = {
-                "nom": cell_name,
-                "coordonnees": (x1, y1, x2, y2),
-                "completion": None,
-                "cote": None
-            }
-        grid.append(row)
-    return grid
+constanteColor = 0
 
 
-def coordToCase(tab, ev):
-    # Récupère les coordonnées x et y de l'événement
-    x, y = abscisse(ev), ordonnee(ev)
-    # Vérifie si les coordonnées x et y sont dans les limites de la grille
-    if marge_gauche_droite <= x <= (marge_gauche_droite + taille_case * 8) and (marge_supplementaire // 2) <= y <= (marge_supplementaire // 2 + taille_case * 8):
-        # Calcule la colonne en fonction de la position x
-        col = (x - marge_gauche_droite) // taille_case
-        # Calcule la ligne en fonction de la position y
-        row = (y - (marge_supplementaire // 2)) // taille_case
-        # Retourne le nom de la case correspondante
-        return tab[row][col][0]
+marge_supplementaire = 4  # Marge supplémentaire pour le haut et le bas
 
-    # Retourne None si les coordonnées ne sont pas dans les limites de la grille
-    return None
+largeur_fenetre, hauteur_fenetre = 1280, 720 + marge_supplementaire  # Augmenter la hauteur de la fenêtre de 4 pixels
 
+cree_fenetre(largeur_fenetre, hauteur_fenetre)
 
-def caseToCoord(var, tab):
-    for i in range(8):
-        for j in range(8):
-            if tab[i][j][0] == var:
-                return tab[i][j][1]
-    return None
-
-
-def get_case(nameCase):
-    """
-    Retourne les informations d'une case à partir du dictionnaire global.
-
-    :param nameCase: Le nom de la case (ex: "A1")
-    :return: Un dictionnaire contenant les informations de la case, ou None si elle n'existe pas
-    """
-    return case_dict.get(nameCase)
-
-def poserBoule(cell_coords, image_path):
-    """
-    Ajoute une boule (image) à la liste des boules à poser.
-    L'image sera dessinée au centre de la case.
-    :param cell_coords: Tuple des coordonnées (x1, y1, x2, y2) de la case
-    :param image_path: Chemin vers l'image à afficher
-    """
-    x1, y1, x2, y2 = cell_coords
-    center_x = (x1 + x2) // 2
-    center_y = (y1 + y2) // 2
-    boules.append((center_x, center_y, image_path))
-
-def dessineBoules():
-    """
-    Dessine toutes les boules stockées dans la liste boules.
-    """
-    for boule in boules:
-        x, y, path = boule
-        image(x, y, path, largeur=taille_case, hauteur=taille_case, ancrage="center")
-        get_case(coordToCase(grid, ev))["completion"] = path
-
-def dessine_quadrillage():
+def dessine_quadrillage(taille_grille, taille_case, marge_gauche_droite):
     # Dessine les lignes horizontales (exactement 9 lignes pour 8 cases)
     for i in range(taille_grille + 1):
         y = i * taille_case + (marge_supplementaire // 2)  # Ajouter la marge supplémentaire en haut
@@ -102,20 +29,121 @@ def dessine_quadrillage():
         x = marge_gauche_droite + i * taille_case
         if x <= largeur_fenetre:  # S'assurer de ne pas dépasser la fenêtre
             ligne(x, (marge_supplementaire // 2), x, (taille_case * taille_grille) + (marge_supplementaire // 2))
+
     # Dessine toutes les boules
-    dessineBoules()
+def createGrid(marge_gauche_droite, taille_case):
+    """
+    Crée une grille de coordonnées et remplit un dictionnaire global pour un accès rapide.
+    Chaque entrée est un tuple contenant le nom de la case et ses coordonnées.
+    :return: grille (liste de listes de tuples)
+    """
+    grid = []
+    for i in range(8):  # Pour les rangées de A à H
+        row = []
+        for j in range(8):  # Pour les colonnes de 1 à 8
+            x1 = marge_gauche_droite + j * taille_case
+            y1 = (marge_supplementaire // 2) + i * taille_case
+            x2 = x1 + taille_case
+            y2 = y1 + taille_case
+            row.append([(x1, y1, x2, y2), None])
 
-def dessineInitiales():
-    imgRouge = "assets/Ruby.png"
-    # Exemple d'images initiales, si nécessaire
-    # poserBoule(caseToCoord("C5", grid), imgRouge)
-    # poserBoule(caseToCoord("D4", grid), imgRouge)
-    # Décommentez les lignes ci-dessus si vous souhaitez placer des boules initiales
+        grid.append(row)
+    return grid
 
-# Création de la fenêtre
-marge_supplementaire = 4  # Marge supplémentaire pour le haut et le bas
-largeur_fenetre, hauteur_fenetre = 1280, 720 + marge_supplementaire  # Augmenter la hauteur de la fenêtre de 4 pixels
-cree_fenetre(largeur_fenetre, hauteur_fenetre)
+
+def coordToCase(grid, ev):
+    # Récupère les coordonnées x et y de l'événement
+    x, y = abscisse(ev), ordonnee(ev)
+    # Vérifie si les coordonnées x et y sont dans les limites de la grille
+    if marge_gauche_droite <= x <= (marge_gauche_droite + taille_case * 8) and (marge_supplementaire // 2) <= y <= (marge_supplementaire // 2 + taille_case * 8):
+        # Calcule la colonne en fonction de la position x
+        col = (x - marge_gauche_droite) // taille_case
+        # Calcule la ligne en fonction de la position y
+        row = (y - (marge_supplementaire // 2)) // taille_case
+        # Retourne le nom de la case correspondante
+        return grid[row][col][0]
+
+
+def getCase(grid, coordRel, taille_case, marge_gauche_droite):
+    """
+    Renvoie la case (coordonnées de la case et son état) à partir des coordonnées relatives en utilisant des calculs directs.
+    :param grid: la grille contenant les informations des cases
+    :param coordRel: tuple (x, y) contenant les coordonnées de l'événement
+    :param taille_case: la taille d'une case de la grille
+    :param marge_gauche_droite: la marge à gauche/droite de la grille
+    :return: tuple (coordonnées de la case, état de la case) ou None si hors de la grille
+    """
+    x, y = coordRel  # Décompose les coordonnées
+
+    # Vérifie si les coordonnées sont dans les limites de la grille
+    if not (marge_gauche_droite <= x < marge_gauche_droite + taille_case * 8 and
+            marge_supplementaire // 2 <= y < (marge_supplementaire // 2) + taille_case * 8):
+        return None
+
+    # Calcule l'index de la colonne et de la ligne
+    col = (x - marge_gauche_droite) // taille_case
+    row = (y - (marge_supplementaire // 2)) // taille_case
+
+    return grid[row][col]  # Retourne la case correspondante
+
+
+
+
+
+def placerBoule(grid, taille_case, marge_gauche_droite, cell_coords, image_path, cell):
+    x1, y1, x2, y2 = cell_coords
+    center_x = (x1 + x2) // 2
+    center_y = (y1 + y2) // 2
+    if cell:
+        cell[1] = image_path
+        image(center_x, center_y, image_path, largeur=taille_case, hauteur=taille_case, ancrage="center")
+
+
+
+def changeColor(path1, path2, path3, path4):
+    global constanteColor  # Utilise la variable globale i
+
+    # Alterne entre 4 couleurs en fonction de la valeur de i
+    if constanteColor % 4 == 0:
+        path = path1  # Pion Bleu
+    elif constanteColor % 4 == 1:
+        path = path2  # Pion Rouge
+    elif constanteColor % 4 == 2:
+        path = path3  # Pion Jaune
+    else:
+        path = path4  # Pion Vert
+
+    constanteColor += 1  # Incrémente i après chaque appel
+    return path
+
+def bouleNextTo(grid, coordRel, taille_case, marge_gauche_droite):
+    x, y = coordRel  # Decompose the coordinates
+    possibilities = [
+        (x - taille_case, y), (x + taille_case, y),
+        (x, y - taille_case), (x, y + taille_case),
+        (x - taille_case, y - taille_case), (x + taille_case, y - taille_case),
+        (x - taille_case, y + taille_case), (x + taille_case, y + taille_case)
+    ]
+    for i in possibilities:
+        case = getCase(grid, i, taille_case, marge_gauche_droite)
+        if case is not None and case[1] is not None:
+            return True
+    return False
+
+
+
+
+
+
+"""def gerer_evenement_clic_gauche(ev):
+    cell_coord = coordToCase(grid, ev)
+    if cell_coord:
+        """
+
+
+
+
+# Var et main
 
 # Taille du quadrillage (8x8)
 taille_grille = 8
@@ -126,49 +154,28 @@ taille_case = (hauteur_fenetre - marge_supplementaire) // taille_grille
 # Calcule l'espace à gauche pour centrer le quadrillage horizontalement
 marge_gauche_droite = (largeur_fenetre - (taille_case * taille_grille)) // 2
 
-# Création de la grille
-grid = createGrid()
+grid = createGrid(marge_gauche_droite, taille_case)
+dessine_quadrillage(taille_grille, taille_case, marge_gauche_droite)
 
-def redraw():
-    efface_tout()
-    dessine_quadrillage()
-    dessineInitiales()  # Si vous avez des boules initiales à dessiner
-    mise_a_jour()
 
-# Initial dessin
-redraw()
 
-def gerer_evenement_clic_gauche(ev):
-    cell_name = coordToCase(grid, ev)
-    if cell_name:
-        cell_coords = caseToCoord(cell_name, grid)
-        print(f"{get_case(cell_name)}")
-        print(f"Clic gauche sur la case {cell_name} avec coordonnées {cell_coords}")
-        # Définir le chemin de l'image à poser, vous pouvez le modifier selon vos besoins
-        chemin_image = "assets/pionBleu.png"  # Remplacez par le chemin de votre image
-        poserBoule(cell_coords, chemin_image)
-        redraw()
-    else:
-        print("Clic gauche en dehors de la grille.")
-    print("Clic gauche au point", (abscisse(ev), ordonnee(ev)))
+center_row, center_col = taille_grille // 2, taille_grille // 2
+center_coords = grid[center_row][center_col][0]
 
-# Boucle principale
+center_path = changeColor("assets/pionBleu.png", "assets/pionRouge.png", "assets/pionJaune.png", "assets/pionVert.png")
+placerBoule(grid, taille_case, marge_gauche_droite, center_coords, center_path, grid[center_row][center_col])
+
+
 while True:
     ev = donne_ev()
     tev = type_ev(ev)
 
-    if tev == 'Touche':
-        print('Appui sur la touche', touche(ev))
-    elif tev == "ClicDroit":
-        print("Clic droit au point", (abscisse(ev), ordonnee(ev)))
-    elif tev == "ClicGauche":
-        gerer_evenement_clic_gauche(ev)
-    elif tev == 'Quitte':  # on sort de la boucle
+    if tev == 'Quitte':  # on sort de la boucle
         break
-    else:  # dans les autres cas, on ne fait rien
-        pass
-
-    # Mise à jour de la fenêtre
+    elif tev == 'ClicGauche':
+        case = getCase(grid, (abscisse(ev), ordonnee(ev)), taille_case, marge_gauche_droite)
+        if case and case[1] == None:  # Vérifie si la case est valide
+            if bouleNextTo(grid, (abscisse(ev), ordonnee(ev)), taille_case, marge_gauche_droite):
+                path = changeColor("assets/pionBleu.png", "assets/pionRouge.png", "assets/pionJaune.png", "assets/pionVert.png")
+                placerBoule(grid, taille_case, marge_gauche_droite, case[0], path, case)
     mise_a_jour()
-
-ferme_fenetre()
