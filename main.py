@@ -163,7 +163,7 @@ def game(nbJoueurs, marge_gauche_droite, taille_case, taille_grille):
         row, col = positions[i]
         placerBoule(grid, taille_case, marge_gauche_droite, grid[row][col][0], boule_paths[i], grid[row][col])
 
-    return grid
+    return grid, boule_paths
 
 # Var et main
 
@@ -176,7 +176,11 @@ taille_case = (hauteur_fenetre - marge_supplementaire) // taille_grille
 # Calcule l'espace à gauche pour centrer le quadrillage horizontalement
 marge_gauche_droite = (largeur_fenetre - (taille_case * taille_grille)) // 2
 
-grid = game(nbJoueurs, marge_gauche_droite, taille_case, taille_grille)
+grid, boule_paths = game(nbJoueurs, marge_gauche_droite, taille_case, taille_grille)
+
+print(grid)
+
+boule_index = 0
 
 while True:
     ev = donne_ev()
@@ -188,5 +192,6 @@ while True:
         case = getCase(grid, (abscisse(ev), ordonnee(ev)), taille_case, marge_gauche_droite)
         if case and case[1] == None:  # Vérifie si la case est valide
             if bouleNextTo(grid, (abscisse(ev), ordonnee(ev)), taille_case, marge_gauche_droite):
-                placerBoule(grid, taille_case, marge_gauche_droite, case[0], "assets/pionBleu.png", case)
+                placerBoule(grid, taille_case, marge_gauche_droite, case[0], boule_paths[boule_index], case)
+                boule_index = (boule_index + 1) % len(boule_paths)  # Cycle through boule_paths
     mise_a_jour()
