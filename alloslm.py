@@ -55,7 +55,7 @@ def affichageScore(score, couleursTab):
     texte((LARGEUR_FENETRE + bordureDroite) // 2, 32, "Scores", police="Arial", taille=20, ancrage="center")
     scoreTrie = []
 
-    for i, (c, s) in enumerate(zip(couleursTab, score)):
+    for i, (s, c) in enumerate(zip(score, couleursTab)):
         scoreTrie.append((s, c))
 
     scoreTrie.sort(reverse=True)
@@ -65,6 +65,26 @@ def affichageScore(score, couleursTab):
               ancrage="nw")
         texte((LARGEUR_FENETRE + bordureDroite) // 2 + 20, 80 + i * 60, str(scoreTrie[i][0]), police="Arial", taille=20,
               ancrage="nw")
+
+def affichageGauche(couleurs, nb_joueurs, tour, lenGrille):
+    # Rectangle en haut à gauche
+    rectangle(0, 4, MARGE_GAUCHE_DROITE, TAILLE_CASE+4, couleur="black", remplissage="#ECB8A5")
+
+    coul = couleurs[tour % nb_joueurs]
+
+    texte(MARGE_GAUCHE_DROITE // 2 - 30, 32, f"Tour :", police="Arial", taille=20, ancrage="center")
+    image(MARGE_GAUCHE_DROITE // 2 + 30, 32, coul, largeur=50, hauteur=50, ancrage="center")
+
+    # Rectangle en bas à gauche
+    rectangle(0, HAUTEUR_FENETRE-TAILLE_CASE-4, MARGE_GAUCHE_DROITE, HAUTEUR_FENETRE-4, couleur="black", remplissage="#ECB8A5")
+
+    texte(MARGE_GAUCHE_DROITE // 2, HAUTEUR_FENETRE - 32, f"{tour + nb_joueurs} / {lenGrille ** 2}", police="Arial",
+          taille=20, ancrage="center")
+
+    #Vide
+    rectangle(0, TAILLE_CASE+4, MARGE_GAUCHE_DROITE, HAUTEUR_FENETRE-TAILLE_CASE-4, couleur="black",
+              remplissage="#ECCFC3")
+
 
 # Vérification dans une direction (optimisée)
 def verifier_direction(grille, ligne, colonne, couleur, d_l, d_c):
@@ -89,7 +109,26 @@ def encadrer_pions(grille, ligne, colonne, couleur):
             grille[l][c] = couleur
 
 
+def bouleNextTo(grille, ligne, colonne):
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]  # 8 directions possibles
+    for d_l, d_c in directions:
+        if 0 <= ligne + d_l < TAILLE_GRILLE and 0 <= colonne + d_c < TAILLE_GRILLE:
+            if grille[ligne + d_l][colonne + d_c] is not None:
+                return True
+    return False
 
+def fin(tour, grille, lenGrille, couleurs, nb_joueurs):
+    if tour == (lenGrille**2) - nb_joueurs:
+        score = tabScore(grille, lenGrille, couleurs)
+        scoreTrie = []
+        for i, (s, c) in enumerate(zip(score, couleurs)):
+            scoreTrie.append((s, c))
+        scoreTrie.sort(reverse=True)
+        return (True, scoreTrie[0])
+    return (False, None)
+
+def affichageV(gagnant):
+    texte(LARGEUR_FENETRE // 2, HAUTEUR_FENETRE // 2, f"Le gagnant est {gagnant[1]}", police="Arial", taille=30, ancrage="center")
 
 # Fonction principale
 def jouer():
@@ -97,13 +136,14 @@ def jouer():
     tour = 0
     milieu = TAILLE_GRILLE // 2
 
+
     # Placement initial
     positions = [(milieu - 1, milieu - 1), (milieu, milieu),
                  (milieu - 1, milieu), (milieu, milieu - 1)]
     for i, (l, c) in enumerate(positions[:nb_joueurs]):
         placer_pion(grille, l, c, COULEURS[i])
 
-    while True:
+    while fin(tour, grille, TAILLE_GRILLE, COULEURS, nb_joueurs)[0] is not True:
         ev = donne_ev()
         tev = type_ev(ev)
 
@@ -117,15 +157,24 @@ def jouer():
             if 0 <= ligne < TAILLE_GRILLE and 0 <= colonne < TAILLE_GRILLE:
                 if grille[ligne][colonne] is None:  # Si la case est vide
                     couleur = COULEURS[tour % nb_joueurs]
-                    placer_pion(grille, ligne, colonne, couleur)
-                    encadrer_pions(grille, ligne, colonne, couleur)
-                    tour += 1  # Prochain joueur
+                    if bouleNextTo(grille, ligne, colonne):
+                        placer_pion(grille, ligne, colonne, couleur)
+                        encadrer_pions(grille, ligne, colonne, couleur)
+                        tour += 1  # Prochain joueur
+                        print(tour)
+                        print(nb_joueurs)
+                        print(fin(tour, grille, TAILLE_GRILLE, COULEURS, nb_joueurs))
         efface_tout()
         dessiner_grille(grille)
         affichageScore(tabScore(grille, TAILLE_GRILLE, COULEURS), COULEURS)
+        affichageGauche(COULEURS, nb_joueurs, tour, TAILLE_GRILLE)
         mise_a_jour()
 
     ferme_fenetre()
+
+    cree_fenetre(LARGEUR_FENETRE, HAUTEUR_FENETRE)
+    affichageV(fin(tour, grille, TAILLE_GRILLE, COULEURS, nb_joueurs)[1])
+    attend_ev()
 
 # Lancement du jeu
 jouer()
