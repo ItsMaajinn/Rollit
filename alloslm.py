@@ -39,26 +39,39 @@ def placer_pion(grille, ligne, colonne, couleur):
 
 
 def tabScore(grille, lenGrille, couleurs):
+    """
+    Fonction qui retourne le score de chaque joueur
+    :param grille: tab de tab avec None ou path
+    :param lenGrille: taille de la grille
+    :param couleurs: tab de path
+    :return: tab de score (int)
+    """
     score = [0, 0, 0, 0]
     for i in range(lenGrille):
         for j in range(lenGrille):
-            if grille[i][j] is not None:
-                index = couleurs.index(grille[i][j])
-                score[index] += 1
+            if grille[i][j] is not None: # Si la case n'est pas vide
+                index = couleurs.index(grille[i][j]) # On récupère l'index de la couleur
+                score[index] += 1 # On incrémente le score
 
     return score
 
 def affichageScore(score, couleursTab):
+    """
+    Fonction qui affiche le score des joueurs
+    :param score: tab de score (int
+    :param couleursTab: # tab de path
+    :return:
+    """
     rectangle(bordureDroite, 4, LARGEUR_FENETRE - 1, TAILLE_CASE + 4, couleur="black", remplissage="#ECB8A5")
     rectangle(bordureDroite, TAILLE_CASE + 4, LARGEUR_FENETRE - 1, HAUTEUR_FENETRE - 4, couleur="black",
               remplissage="#ECCFC3")
     texte((LARGEUR_FENETRE + bordureDroite) // 2, 32, "Scores", police="Arial", taille=20, ancrage="center")
     scoreTrie = []
 
-    for i, (s, c) in enumerate(zip(score, couleursTab)):
+    for i, (s, c) in enumerate(zip(score, couleursTab)): # zip crée un tuple avec les éléments de chaque tab
         scoreTrie.append((s, c))
 
-    scoreTrie.sort(reverse=True)
+    scoreTrie.sort(reverse=True) # On trie le tableau par score décroissant
 
     for  i in range(len(scoreTrie)):
         image((LARGEUR_FENETRE + bordureDroite) // 2 - 60, 70 + i * 60, scoreTrie[i][1], largeur=50, hauteur=50,
@@ -66,7 +79,18 @@ def affichageScore(score, couleursTab):
         texte((LARGEUR_FENETRE + bordureDroite) // 2 + 20, 80 + i * 60, str(scoreTrie[i][0]), police="Arial", taille=20,
               ancrage="nw")
 
+
+
+
 def affichageGauche(couleurs, nb_joueurs, tour, lenGrille):
+    """
+    Fonction qui affiche le tour actuel et le nombre de tours restants
+    :param couleurs:
+    :param nb_joueurs:
+    :param tour:
+    :param lenGrille:
+    :return:
+    """
     # Rectangle en haut à gauche
     rectangle(0, 4, MARGE_GAUCHE_DROITE, TAILLE_CASE+4, couleur="black", remplissage="#ECB8A5")
 
@@ -110,28 +134,53 @@ def encadrer_pions(grille, ligne, colonne, couleur):
 
 
 def bouleNextTo(grille, ligne, colonne):
+    """
+    Fonction qui vérifie si une boule est à côté de la case
+    :param grille:
+    :param ligne:
+    :param colonne:
+    :return:
+    """
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]  # 8 directions possibles
     for d_l, d_c in directions:
-        if 0 <= ligne + d_l < TAILLE_GRILLE and 0 <= colonne + d_c < TAILLE_GRILLE:
-            if grille[ligne + d_l][colonne + d_c] is not None:
+        if 0 <= ligne + d_l < TAILLE_GRILLE and 0 <= colonne + d_c < TAILLE_GRILLE: # Si la case est dans la grille
+            if grille[ligne + d_l][colonne + d_c] is not None: # Si la case n'est pas vide
                 return True
     return False
 
 def fin(tour, grille, lenGrille, couleurs, nb_joueurs):
-    if tour == (lenGrille**2) - nb_joueurs:
-        score = tabScore(grille, lenGrille, couleurs)
+    """
+    Fonction qui vérifie si la partie est terminée
+    :param tour:
+    :param grille:
+    :param lenGrille:
+    :param couleurs:
+    :param nb_joueurs:
+    :return:
+    """
+    if tour == (lenGrille**2) - nb_joueurs: # Si le nombre de tours est égal au nombre de cases - nombre de joueurs
+        score = tabScore(grille, lenGrille, couleurs) # On récupère les scores
         scoreTrie = []
         for i, (s, c) in enumerate(zip(score, couleurs)):
             scoreTrie.append((s, c))
         scoreTrie.sort(reverse=True)
-        return (True, scoreTrie[0])
-    return (False, None)
+        return (True, scoreTrie[0]) # On retourne True et le gagnant
+    return (False, None) # Sinon on retourne False et donc pas de gagnant (None)
 
 def affichageV(gagnant):
+    """
+    Affichage temporaire qui affiche le gagnant
+    :param gagnant:
+    :return:
+    """
     texte(LARGEUR_FENETRE // 2, HAUTEUR_FENETRE // 2, f"Le gagnant est {gagnant[1]}", police="Arial", taille=30, ancrage="center")
 
 # Fonction principale
 def jouer():
+    """
+    Fonction principale qui gère le jeu
+    :return:
+    """
     grille = creer_grille()
     tour = 0
     milieu = TAILLE_GRILLE // 2
