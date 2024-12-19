@@ -1,6 +1,6 @@
 from fltk import *
 import wx
-
+from asyncio import *
 
 # Interface pour choisir le nombre de joueurs
 app = wx.App()
@@ -20,13 +20,14 @@ def creer_grille():
     return [[None for _ in range(TAILLE_GRILLE)] for _ in range(TAILLE_GRILLE)]
 
 # Dessiner la grille et les pions
-def dessiner_grille(grille):
+def dessiner_grille(grille, lenGrille, couleurs):
+    coul = changerCouleur(grille, lenGrille, couleurs)
     for i in range(TAILLE_GRILLE):
         for j in range(TAILLE_GRILLE):
             x1 = MARGE_GAUCHE_DROITE + j * TAILLE_CASE
             y1 = 4 + i * TAILLE_CASE
             x2, y2 = x1 + TAILLE_CASE, y1 + TAILLE_CASE
-            rectangle(x1, y1, x2, y2, remplissage="#ECCFC3")
+            rectangle(x1, y1, x2, y2, remplissage=coul[0])
             if grille[i][j]:  # Si une couleur est présente
                 image((x1 + x2) // 2, (y1 + y2) // 2, grille[i][j],
                       largeur=TAILLE_CASE, hauteur=TAILLE_CASE, ancrage="center", tag="pion")
@@ -55,16 +56,17 @@ def tabScore(grille, lenGrille, couleurs):
 
     return score
 
-def affichageScore(score, couleursTab):
+def affichageScore(score, couleursTab, grille, TAILLE_GRILLE):
     """
     Fonction qui affiche le score des joueurs
     :param score: tab de score (int
     :param couleursTab: # tab de path
     :return:
     """
-    rectangle(bordureDroite, 4, LARGEUR_FENETRE - 1, TAILLE_CASE + 4, couleur="black", remplissage="#ECB8A5")
+    coul = changerCouleur(grille, TAILLE_GRILLE, couleursTab)
+    rectangle(bordureDroite, 4, LARGEUR_FENETRE - 1, TAILLE_CASE + 4, couleur="black", remplissage=coul[1])
     rectangle(bordureDroite, TAILLE_CASE + 4, LARGEUR_FENETRE - 1, HAUTEUR_FENETRE - 4, couleur="black",
-              remplissage="#ECCFC3")
+              remplissage=coul[0])
     texte((LARGEUR_FENETRE + bordureDroite) // 2, 32, "Scores", police="Arial", taille=20, ancrage="center")
     scoreTrie = []
 
@@ -82,7 +84,7 @@ def affichageScore(score, couleursTab):
 
 
 
-def affichageGauche(couleurs, nb_joueurs, tour, lenGrille):
+def affichageGauche(couleurs, nb_joueurs, tour, lenGrille, grille):
     """
     Fonction qui affiche le tour actuel et le nombre de tours restants
     :param couleurs:
@@ -91,24 +93,24 @@ def affichageGauche(couleurs, nb_joueurs, tour, lenGrille):
     :param lenGrille:
     :return:
     """
+    coul = changerCouleur(grille, lenGrille, couleurs)
     # Rectangle en haut à gauche
-    rectangle(0, 4, MARGE_GAUCHE_DROITE, TAILLE_CASE+4, couleur="black", remplissage="#ECB8A5")
+    rectangle(0, 4, MARGE_GAUCHE_DROITE, TAILLE_CASE+4, couleur="black", remplissage=coul[1])
 
-    coul = couleurs[tour % nb_joueurs]
+    couleur = couleurs[tour % nb_joueurs]
 
     texte(MARGE_GAUCHE_DROITE // 2 - 30, 32, f"Tour :", police="Arial", taille=20, ancrage="center")
-    image(MARGE_GAUCHE_DROITE // 2 + 30, 32, coul, largeur=50, hauteur=50, ancrage="center")
+    image(MARGE_GAUCHE_DROITE // 2 + 30, 32, couleur, largeur=50, hauteur=50, ancrage="center")
 
     # Rectangle en bas à gauche
-    rectangle(0, HAUTEUR_FENETRE-TAILLE_CASE-4, MARGE_GAUCHE_DROITE, HAUTEUR_FENETRE-4, couleur="black", remplissage="#ECB8A5")
+    rectangle(0, HAUTEUR_FENETRE-TAILLE_CASE-4, MARGE_GAUCHE_DROITE, HAUTEUR_FENETRE-4, couleur="black", remplissage=coul[1])
 
     texte(MARGE_GAUCHE_DROITE // 2, HAUTEUR_FENETRE - 32, f"{tour + nb_joueurs} / {lenGrille ** 2}", police="Arial",
           taille=20, ancrage="center")
 
-    #Vide
+    # Vide
     rectangle(0, TAILLE_CASE+4, MARGE_GAUCHE_DROITE, HAUTEUR_FENETRE-TAILLE_CASE-4, couleur="black",
-              remplissage="#ECCFC3")
-
+              remplissage=coul[0])
 
 # Vérification dans une direction (optimisée)
 def verifier_direction(grille, ligne, colonne, couleur, d_l, d_c):
@@ -167,6 +169,25 @@ def fin(tour, grille, lenGrille, couleurs, nb_joueurs):
         return (True, scoreTrie[0]) # On retourne True et le gagnant
     return (False, None) # Sinon on retourne False et donc pas de gagnant (None)
 
+
+def changerCouleur(grille, lenGrille, couleurs):
+    score = tabScore(grille, lenGrille, couleurs)  # On récupère les scores
+    scoreTrie = []
+    for i, (s, c) in enumerate(zip(score, couleurs)):
+        scoreTrie.append((s, c))
+    scoreTrie.sort(reverse=True)
+    if scoreTrie[0][1] == "assets/pionRouge.png":
+        return ("#ECCFC3", "#ECB8A5")
+    elif scoreTrie[0][1] == "assets/pionBleu.png":
+        return ("#ADD7F6", "#87BFFF")
+    elif scoreTrie[0][1] == "assets/pionJaune.png":
+        return ("#F2E29F", "#FADF7F")
+    elif scoreTrie[0][1] == "assets/pionVert.png":
+        return ("#C6EBBE", "#A9DBB8")
+    else:
+        return ("#FFFFFF", "#000000")
+
+
 def affichageV(gagnant):
     """
     Affichage temporaire qui affiche le gagnant
@@ -214,9 +235,9 @@ def jouer():
                         print(nb_joueurs)
                         print(fin(tour, grille, TAILLE_GRILLE, COULEURS, nb_joueurs))
         efface_tout()
-        dessiner_grille(grille)
-        affichageScore(tabScore(grille, TAILLE_GRILLE, COULEURS), COULEURS)
-        affichageGauche(COULEURS, nb_joueurs, tour, TAILLE_GRILLE)
+        dessiner_grille(grille, TAILLE_GRILLE, COULEURS)
+        affichageScore(tabScore(grille, TAILLE_GRILLE, COULEURS), COULEURS, grille, TAILLE_GRILLE)
+        affichageGauche(COULEURS, nb_joueurs, tour, TAILLE_GRILLE, grille)
         mise_a_jour()
 
     ferme_fenetre()
