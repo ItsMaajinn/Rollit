@@ -8,12 +8,10 @@ nb_joueurs = int(wx.GetTextFromUser("Nombre de joueurs (entre 2 et 4)"))
 
 # Configuration
 LARGEUR_FENETRE, HAUTEUR_FENETRE = 854, 480
-TAILLE_GRILLE = 8
-MARGE = 4
-
-TAILLE_CASE = (HAUTEUR_FENETRE - MARGE) // TAILLE_GRILLE
+TAILLE_GRILLE = 9
+TAILLE_CASE = (HAUTEUR_FENETRE - 4) // TAILLE_GRILLE
 MARGE_GAUCHE_DROITE = (LARGEUR_FENETRE - (TAILLE_CASE * TAILLE_GRILLE)) // 2
-COULEURS = ["assets/pionRouge.png", "assets/pionBleu.png", "assets/pionJaune.png", "assets/pionVert.png"][:nb_joueurs]
+COULEURS = ["../assets/pionRouge.png", "../assets/pionBleu.png", "../assets/pionJaune.png", "../assets/pionVert.png"][:nb_joueurs]
 bordureDroite = MARGE_GAUCHE_DROITE + (TAILLE_GRILLE * TAILLE_CASE)
 cree_fenetre(LARGEUR_FENETRE, HAUTEUR_FENETRE)
 
@@ -67,7 +65,7 @@ def affichageScore(score, couleursTab, grille, TAILLE_GRILLE):
     """
     coul = changerCouleur(grille, TAILLE_GRILLE, couleursTab)
     rectangle(bordureDroite, 4, LARGEUR_FENETRE - 1, TAILLE_CASE + 4, couleur="black", remplissage=coul[1])
-    rectangle(bordureDroite, TAILLE_CASE + 4, LARGEUR_FENETRE - 1, HAUTEUR_FENETRE - 4, couleur="black",
+    rectangle(bordureDroite, TAILLE_CASE + 4, LARGEUR_FENETRE - 1, HAUTEUR_FENETRE - 8, couleur="black",
               remplissage=coul[0])
     texte((LARGEUR_FENETRE + bordureDroite) // 2, 32, "Scores", police="Arial", taille=20, ancrage="center")
     scoreTrie = []
@@ -84,8 +82,6 @@ def affichageScore(score, couleursTab, grille, TAILLE_GRILLE):
               ancrage="nw")
 
 
-
-
 def affichageGauche(couleurs, nb_joueurs, tour, lenGrille, grille):
     """
     Fonction qui affiche le tour actuel et le nombre de tours restants
@@ -96,8 +92,9 @@ def affichageGauche(couleurs, nb_joueurs, tour, lenGrille, grille):
     :return:
     """
     coul = changerCouleur(grille, lenGrille, couleurs)
+
     # Rectangle en haut à gauche
-    rectangle(0, 4, MARGE_GAUCHE_DROITE, TAILLE_CASE+4, couleur="black", remplissage=coul[1])
+    rectangle(0, 4, MARGE_GAUCHE_DROITE, TAILLE_CASE + 4, couleur="black", remplissage=coul[1])
 
     couleur = couleurs[tour % nb_joueurs]
 
@@ -105,14 +102,14 @@ def affichageGauche(couleurs, nb_joueurs, tour, lenGrille, grille):
     image(MARGE_GAUCHE_DROITE // 2 + 30, 32, couleur, largeur=50, hauteur=50, ancrage="center")
 
     # Rectangle en bas à gauche
-    rectangle(0, HAUTEUR_FENETRE-TAILLE_CASE-4, MARGE_GAUCHE_DROITE, HAUTEUR_FENETRE-4, couleur="black", remplissage=coul[1])
+    rectangle(0, HAUTEUR_FENETRE - TAILLE_CASE - 8, MARGE_GAUCHE_DROITE, HAUTEUR_FENETRE - 8, couleur="black",
+              remplissage=coul[1])
 
     texte(MARGE_GAUCHE_DROITE // 2, HAUTEUR_FENETRE - 32, f"{tour + nb_joueurs} / {lenGrille ** 2}", police="Arial",
           taille=20, ancrage="center")
 
     # Vide
-    rectangle(0, TAILLE_CASE+4, MARGE_GAUCHE_DROITE, HAUTEUR_FENETRE-TAILLE_CASE-4, couleur="black",
-              remplissage=coul[0])
+    rectangle(0, TAILLE_CASE + 4, MARGE_GAUCHE_DROITE, HAUTEUR_FENETRE - TAILLE_CASE - 8, couleur="black", remplissage=coul[0])
 
 # Vérification dans une direction (optimisée)
 def verifier_direction(grille, ligne, colonne, couleur, d_l, d_c):
@@ -178,13 +175,13 @@ def changerCouleur(grille, lenGrille, couleurs):
     for i, (s, c) in enumerate(zip(score, couleurs)):
         scoreTrie.append((s, c))
     scoreTrie.sort(reverse=True)
-    if scoreTrie[0][1] == "assets/pionRouge.png":
+    if scoreTrie[0][1] == "../assets/pionRouge.png":
         return ("#ECCFC3", "#ECB8A5")
-    elif scoreTrie[0][1] == "assets/pionBleu.png":
+    elif scoreTrie[0][1] == "../assets/pionBleu.png":
         return ("#ADD7F6", "#87BFFF")
-    elif scoreTrie[0][1] == "assets/pionJaune.png":
+    elif scoreTrie[0][1] == "../assets/pionJaune.png":
         return ("#F2E29F", "#FADF7F")
-    elif scoreTrie[0][1] == "assets/pionVert.png":
+    elif scoreTrie[0][1] == "../assets/pionVert.png":
         return ("#C6EBBE", "#A9DBB8")
     else:
         return ("#FFFFFF", "#000000")

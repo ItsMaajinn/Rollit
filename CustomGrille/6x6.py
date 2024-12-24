@@ -8,12 +8,10 @@ nb_joueurs = int(wx.GetTextFromUser("Nombre de joueurs (entre 2 et 4)"))
 
 # Configuration
 LARGEUR_FENETRE, HAUTEUR_FENETRE = 854, 480
-TAILLE_GRILLE = 8
-MARGE = 4
-
-TAILLE_CASE = (HAUTEUR_FENETRE - MARGE) // TAILLE_GRILLE
+TAILLE_GRILLE = 6
+TAILLE_CASE = (HAUTEUR_FENETRE - 4) // TAILLE_GRILLE
 MARGE_GAUCHE_DROITE = (LARGEUR_FENETRE - (TAILLE_CASE * TAILLE_GRILLE)) // 2
-COULEURS = ["assets/pionRouge.png", "assets/pionBleu.png", "assets/pionJaune.png", "assets/pionVert.png"][:nb_joueurs]
+COULEURS = ["../assets/pionRouge.png", "../assets/pionBleu.png", "../assets/pionJaune.png", "../assets/pionVert.png"][:nb_joueurs]
 bordureDroite = MARGE_GAUCHE_DROITE + (TAILLE_GRILLE * TAILLE_CASE)
 cree_fenetre(LARGEUR_FENETRE, HAUTEUR_FENETRE)
 
@@ -59,29 +57,30 @@ def tabScore(grille, lenGrille, couleurs):
     return score
 
 def affichageScore(score, couleursTab, grille, TAILLE_GRILLE):
-    """
-    Fonction qui affiche le score des joueurs
-    :param score: tab de score (int
-    :param couleursTab: # tab de path
-    :return:
-    """
     coul = changerCouleur(grille, TAILLE_GRILLE, couleursTab)
+
+    # Zone du titre "Scores"
     rectangle(bordureDroite, 4, LARGEUR_FENETRE - 1, TAILLE_CASE + 4, couleur="black", remplissage=coul[1])
-    rectangle(bordureDroite, TAILLE_CASE + 4, LARGEUR_FENETRE - 1, HAUTEUR_FENETRE - 4, couleur="black",
-              remplissage=coul[0])
-    texte((LARGEUR_FENETRE + bordureDroite) // 2, 32, "Scores", police="Arial", taille=20, ancrage="center")
+    texte((LARGEUR_FENETRE + bordureDroite) // 2, (TAILLE_CASE + 4) // 2, "Scores", police="Arial", taille=20,
+          ancrage="center")
+    # Zone des scores (le reste de l'espace à droite)
+    rectangle(bordureDroite, TAILLE_CASE + 4, LARGEUR_FENETRE - 1, HAUTEUR_FENETRE-22
+              , couleur="black", remplissage=coul[0])
+
+    # Affichage des scores triés
     scoreTrie = []
-
-    for i, (s, c) in enumerate(zip(score, couleursTab)): # zip crée un tuple avec les éléments de chaque tab
+    for i, (s, c) in enumerate(zip(score, couleursTab)):
         scoreTrie.append((s, c))
+    scoreTrie.sort(reverse=True)
 
-    scoreTrie.sort(reverse=True) # On trie le tableau par score décroissant
+    # Centrage vertical des scores
+    y_start = (HAUTEUR_FENETRE - (len(scoreTrie) * 60)) // 2  # Calculer le point de départ centré verticalement
+    for i in range(len(scoreTrie)):
+        image((LARGEUR_FENETRE + bordureDroite) // 2 - 60, y_start + i * 60, scoreTrie[i][1], largeur=50, hauteur=50,
+              ancrage="nw")
+        texte((LARGEUR_FENETRE + bordureDroite) // 2 + 20, y_start + i * 60 + 10, str(scoreTrie[i][0]), police="Arial",
+              taille=20, ancrage="nw")
 
-    for  i in range(len(scoreTrie)):
-        image((LARGEUR_FENETRE + bordureDroite) // 2 - 60, 70 + i * 60, scoreTrie[i][1], largeur=50, hauteur=50,
-              ancrage="nw")
-        texte((LARGEUR_FENETRE + bordureDroite) // 2 + 20, 80 + i * 60, str(scoreTrie[i][0]), police="Arial", taille=20,
-              ancrage="nw")
 
 
 
@@ -101,17 +100,17 @@ def affichageGauche(couleurs, nb_joueurs, tour, lenGrille, grille):
 
     couleur = couleurs[tour % nb_joueurs]
 
-    texte(MARGE_GAUCHE_DROITE // 2 - 30, 32, f"Tour :", police="Arial", taille=20, ancrage="center")
-    image(MARGE_GAUCHE_DROITE // 2 + 30, 32, couleur, largeur=50, hauteur=50, ancrage="center")
+    texte((MARGE_GAUCHE_DROITE // 2)-20, (TAILLE_CASE + 4) // 2, f"Tour :", police="Arial", taille=20, ancrage="center")
+    image(MARGE_GAUCHE_DROITE // 2 + 40, (TAILLE_CASE + 4) // 2, couleur, largeur=50, hauteur=50, ancrage="center")
 
     # Rectangle en bas à gauche
-    rectangle(0, HAUTEUR_FENETRE-TAILLE_CASE-4, MARGE_GAUCHE_DROITE, HAUTEUR_FENETRE-4, couleur="black", remplissage=coul[1])
+    rectangle(0, HAUTEUR_FENETRE-TAILLE_CASE-2, MARGE_GAUCHE_DROITE, HAUTEUR_FENETRE-2, couleur="black", remplissage=coul[1])
 
-    texte(MARGE_GAUCHE_DROITE // 2, HAUTEUR_FENETRE - 32, f"{tour + nb_joueurs} / {lenGrille ** 2}", police="Arial",
-          taille=20, ancrage="center")
+    texte(MARGE_GAUCHE_DROITE // 2, HAUTEUR_FENETRE - (TAILLE_CASE // 2) - 2, f"{tour + nb_joueurs} / {lenGrille ** 2}",
+          police="Arial", taille=20, ancrage="center")
 
     # Vide
-    rectangle(0, TAILLE_CASE+4, MARGE_GAUCHE_DROITE, HAUTEUR_FENETRE-TAILLE_CASE-4, couleur="black",
+    rectangle(0, TAILLE_CASE+4, MARGE_GAUCHE_DROITE, HAUTEUR_FENETRE-TAILLE_CASE-2, couleur="black",
               remplissage=coul[0])
 
 # Vérification dans une direction (optimisée)
@@ -178,13 +177,13 @@ def changerCouleur(grille, lenGrille, couleurs):
     for i, (s, c) in enumerate(zip(score, couleurs)):
         scoreTrie.append((s, c))
     scoreTrie.sort(reverse=True)
-    if scoreTrie[0][1] == "assets/pionRouge.png":
+    if scoreTrie[0][1] == "../assets/pionRouge.png":
         return ("#ECCFC3", "#ECB8A5")
-    elif scoreTrie[0][1] == "assets/pionBleu.png":
+    elif scoreTrie[0][1] == "../assets/pionBleu.png":
         return ("#ADD7F6", "#87BFFF")
-    elif scoreTrie[0][1] == "assets/pionJaune.png":
+    elif scoreTrie[0][1] == "../assets/pionJaune.png":
         return ("#F2E29F", "#FADF7F")
-    elif scoreTrie[0][1] == "assets/pionVert.png":
+    elif scoreTrie[0][1] == "../assets/pionVert.png":
         return ("#C6EBBE", "#A9DBB8")
     else:
         return ("#FFFFFF", "#000000")
