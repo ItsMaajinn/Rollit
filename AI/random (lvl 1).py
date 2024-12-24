@@ -1,7 +1,6 @@
-import copy
 from fltk import *
 import wx
-
+from random import randint
 
 # Interface pour choisir le nombre de joueurs
 app = wx.App()
@@ -11,7 +10,7 @@ TAILLE_GRILLE = 8
 TAILLE_CASE = (HAUTEUR_FENETRE - 4) // TAILLE_GRILLE
 MARGE_GAUCHE_DROITE = (LARGEUR_FENETRE - (TAILLE_CASE * TAILLE_GRILLE)) // 2
 nb_joueurs = 2
-COULEURS = ["assets/pionRouge.png", "assets/pionBleu.png", "assets/pionJaune.png", "assets/pionVert.png"][:nb_joueurs]
+COULEURS = ["../assets/pionRouge.png", "../assets/pionBleu.png", "../assets/pionJaune.png", "../assets/pionVert.png"][:nb_joueurs]
 bordureDroite = MARGE_GAUCHE_DROITE + (TAILLE_GRILLE * TAILLE_CASE)
 milieu = TAILLE_GRILLE // 2
 
@@ -36,13 +35,13 @@ def changerCouleur(grille, lenGrille, couleurs):
     for i, (s, c) in enumerate(zip(score, couleurs)):
         scoreTrie.append((s, c))
     scoreTrie.sort(reverse=True)
-    if scoreTrie[0][1] == "assets/pionRouge.png":
+    if scoreTrie[0][1] == "../assets/pionRouge.png":
         return ("#ECCFC3", "#ECB8A5")
-    elif scoreTrie[0][1] == "assets/pionBleu.png":
+    elif scoreTrie[0][1] == "../assets/pionBleu.png":
         return ("#ADD7F6", "#87BFFF")
-    elif scoreTrie[0][1] == "assets/pionJaune.png":
+    elif scoreTrie[0][1] == "../assets/pionJaune.png":
         return ("#F2E29F", "#FADF7F")
-    elif scoreTrie[0][1] == "assets/pionVert.png":
+    elif scoreTrie[0][1] == "../assets/pionVert.png":
         return ("#C6EBBE", "#A9DBB8")
     else:
         return ("#FFFFFF", "#000000")
@@ -120,60 +119,11 @@ def coups_possibles(grille, couleurs):
 
     return coups
 
-def simuler_coups(grille, coup, couleur):
-    copie = copy.deepcopy(grille)
-    ligne, colonne = coup
-    placer_pion(copie, ligne, colonne, couleur)
-    encadrer_pions(copie, ligne, colonne, couleur)
-    return copie
-
-
-
-
-def evaluation(grille, couleurs, lenGrille):
-    scores = tabScore(grille, lenGrille, couleurs)
-    scoreIA = scores[1]
-    scoreJoueur = scores[0]
-    return scoreIA - scoreJoueur
-
 def fin(grille):
     for ligne in grille:
         if None in ligne:
             return False
     return True
-
-
-def minimax(grille, profondeur, maximisant, couleurs, lenGrille):
-    # Conditions d'arrêt
-    if profondeur == 0 or fin(grille):
-        return evaluation(grille, couleurs, lenGrille), None
-
-    # Coups possibles
-    coups = coups_possibles(grille, couleurs)
-
-    if maximisant:
-        best_score = float('-inf')
-        best_move = None
-        for coup in coups:
-            # Simuler le coup sur une copie de la grille
-            grilleTemp = simuler_coups(grille, coup, couleurs[1])
-            score, _ = minimax(grilleTemp, profondeur - 1, False, couleurs, lenGrille)
-            if score > best_score:
-                best_score = score
-                best_move = coup
-        return best_score, best_move
-
-    else:
-        best_score = float('inf')
-        best_move = None
-        for coup in coups:
-            # Simuler le coup sur une copie de la grille
-            grilleTemp = simuler_coups(grille, coup, couleurs[0])
-            score, _ = minimax(grilleTemp, profondeur - 1, True, couleurs, lenGrille)
-            if score < best_score:
-                best_score = score
-                best_move = coup
-        return best_score, best_move
 
 def affichageScore(score, couleursTab, grille, TAILLE_GRILLE):
     """
@@ -261,14 +211,20 @@ def jouer():
                             encadrer_pions(grille, ligne, colonne, couleur)
                             tour += 1  # Prochain joueur
         else:
-            score, coup = minimax(grille, 3, True, COULEURS, TAILLE_GRILLE)
-            grille = simuler_coups(grille, coup, COULEURS[1])
+            coups = coups_possibles(grille, COULEURS)
+            coup = randint(0, len(coups) - 1)
+            placer_pion(grille, coups[coup][0], coups[coup][1], COULEURS[tour % nb_joueurs])
+            encadrer_pions(grille, coups[coup][0], coups[coup][1], COULEURS[tour % nb_joueurs])
             tour += 1
         efface_tout()
         dessiner_grille(grille, TAILLE_GRILLE, COULEURS)
         affichageScore(tabScore(grille, TAILLE_GRILLE, COULEURS), COULEURS, grille, TAILLE_GRILLE)
         affichageGauche(COULEURS, nb_joueurs, tour, TAILLE_GRILLE, grille)
         mise_a_jour()
+
+
+
+
 
 
 jouer()
