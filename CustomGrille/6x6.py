@@ -57,6 +57,14 @@ def tabScore(grille, lenGrille, couleurs):
     return score
 
 def affichageScore(score, couleursTab, grille, TAILLE_GRILLE):
+    """
+    Fonction qui affiche les scores (à droite)
+    :param score:
+    :param couleursTab:
+    :param grille:
+    :param TAILLE_GRILLE:
+    :return:
+    """
     coul = changerCouleur(grille, TAILLE_GRILLE, couleursTab)
 
     # Zone du titre "Scores"
@@ -115,6 +123,15 @@ def affichageGauche(couleurs, nb_joueurs, tour, lenGrille, grille):
 
 # Vérification dans une direction (optimisée)
 def verifier_direction(grille, ligne, colonne, couleur, d_l, d_c):
+    """
+    :param grille:
+    :param ligne:
+    :param colonne:
+    :param couleur:
+    :param d_l:
+    :param d_c:
+    :return:
+    """
     a_encadrer = []
     l, c = ligne + d_l, colonne + d_c
     while 0 <= l < TAILLE_GRILLE and 0 <= c < TAILLE_GRILLE:
@@ -129,6 +146,13 @@ def verifier_direction(grille, ligne, colonne, couleur, d_l, d_c):
 
 # Encadrer les pions
 def encadrer_pions(grille, ligne, colonne, couleur):
+    """
+    :param grille:
+    :param ligne:
+    :param colonne:
+    :param couleur:
+    :return:
+    """
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
     for d_l, d_c in directions:
         a_encadrer = verifier_direction(grille, ligne, colonne, couleur, d_l, d_c)
@@ -172,6 +196,13 @@ def fin(tour, grille, lenGrille, couleurs, nb_joueurs):
 
 
 def changerCouleur(grille, lenGrille, couleurs):
+    """
+    Fonction qui change la couleur de fond en fonction du gagnant
+    :param grille:
+    :param lenGrille:
+    :param couleurs:
+    :return:
+    """
     score = tabScore(grille, lenGrille, couleurs)  # On récupère les scores
     scoreTrie = []
     for i, (s, c) in enumerate(zip(score, couleurs)):

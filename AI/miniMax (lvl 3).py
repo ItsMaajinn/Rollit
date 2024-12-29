@@ -112,6 +112,12 @@ def bouleNextTo(grille, ligne, colonne):
 
 
 def coups_possibles(grille, couleurs):
+    """
+    Fonction qui retourne les coups possibles
+    :param grille:
+    :param couleurs:
+    :return:
+    """
     coups = []
     for i in range(TAILLE_GRILLE):
         for j in range(TAILLE_GRILLE):
@@ -121,6 +127,13 @@ def coups_possibles(grille, couleurs):
     return coups
 
 def simuler_coups(grille, coup, couleur):
+    """
+    Fonction qui simule un coup
+    :param grille:
+    :param coup:
+    :param couleur:
+    :return:
+    """
     copie = copy.deepcopy(grille)
     ligne, colonne = coup
     placer_pion(copie, ligne, colonne, couleur)
@@ -131,6 +144,13 @@ def simuler_coups(grille, coup, couleur):
 
 
 def evaluation(grille, couleurs, lenGrille):
+    """
+    Fonction qui évalue la grille
+    :param grille:
+    :param couleurs:
+    :param lenGrille:
+    :return:
+    """
     scores = tabScore(grille, lenGrille, couleurs)
     scoreIA = scores[1]
     scoreJoueur = scores[0]
@@ -144,6 +164,15 @@ def fin(grille):
 
 
 def minimax(grille, profondeur, maximisant, couleurs, lenGrille):
+    """
+    Fonction qui implémente l'algorithme minimax
+    :param grille:
+    :param profondeur:
+    :param maximisant:
+    :param couleurs:
+    :param lenGrille:
+    :return:
+    """
     # Conditions d'arrêt
     if profondeur == 0 or fin(grille):
         return evaluation(grille, couleurs, lenGrille), None
