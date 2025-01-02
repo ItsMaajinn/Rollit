@@ -1,79 +1,26 @@
 from fltk import *
-import ast
+import wx
 import os
-import os
-from tkinter import Tk, filedialog
-
-def load_save(file_path):
-    """
-    Fonction qui permet de charger les informations sauvegardées depuis un fichier
-    :param file_path: Chemin complet du fichier de sauvegarde
-    :return: Un dictionnaire contenant les informations de la partie
-    """
-    if not os.path.exists(file_path):
-        print(f"Le fichier {file_path} n'existe pas.")
-        return None
-
-    with open(file_path, 'r', encoding='utf8') as save_file:
-        data = save_file.readlines()
-
-    if len(data) < 5:
-        print("Le fichier de sauvegarde est corrompu ou incomplet.")
-        return None
-
-    try:
-        grille = eval(data[0].strip())
-        tour = int(data[1].strip())
-        nb_joueurs = int(data[2].strip())
-        taille_grille = int(data[3].strip())
-        couleurs = eval(data[4].strip())
-
-        return {
-            "grille": grille,
-            "tour": tour,
-            "nb_joueurs": nb_joueurs,
-            "taille_grille": taille_grille,
-            "couleurs": couleurs
-        }
-    except Exception as e:
-        print(f"Erreur lors du chargement de la sauvegarde : {e}")
-        return None
-def open_save_folder():
-    # Open a file dialog to select a file in the save folder
-    root = Tk()
-    root.withdraw()  # Hide the root window
-
-    # Get the save folder path (modify as needed)
-    save_folder_path = os.path.expanduser("~/sauvegarde")
-
-    # Ensure the save folder exists
-    if not os.path.exists(save_folder_path):
-        print("Le dossier 'sauvegarde' n'existe pas.")
-        return None
-
-    # Open the file dialog in the save folder
-    file_path = filedialog.askopenfilename(initialdir=save_folder_path, title="Sélectionnez un fichier")
-
-    # Check if a file was selected
-    if file_path:
-        return file_path
-    else:
-        return None
-
-
-def partie_en_cours(grille, tour, nb_joueurs, taille_grille, couleurs):
+def lancer_jeu(nb_joueurs, taille_grille):
     # Configuration
     LARGEUR_FENETRE, HAUTEUR_FENETRE = 854, 480
     TAILLE_GRILLE = taille_grille
     MARGE = 4
+
     TAILLE_CASE = (HAUTEUR_FENETRE - MARGE) // TAILLE_GRILLE
     MARGE_GAUCHE_DROITE = (LARGEUR_FENETRE - (TAILLE_CASE * TAILLE_GRILLE)) // 2
+    COULEURS = ["assets/pionRouge.png", "assets/pionBleu.png", "assets/pionJaune.png", "assets/pionVert.png"][:nb_joueurs]
     bordureDroite = MARGE_GAUCHE_DROITE + (TAILLE_GRILLE * TAILLE_CASE)
+    nb_parties = 1
     cree_fenetre(LARGEUR_FENETRE, HAUTEUR_FENETRE)
 
+    # Création de la grille
+    def creer_grille():
+        return [[None for _ in range(TAILLE_GRILLE)] for _ in range(TAILLE_GRILLE)]
+
     # Dessiner la grille et les pions
-    def dessiner_grille(grille, couleurs):
-        coul = changerCouleur(grille, couleurs)
+    def dessiner_grille(grille, lenGrille, couleurs):
+        coul = changerCouleur(grille, lenGrille, couleurs)
         for i in range(TAILLE_GRILLE):
             for j in range(TAILLE_GRILLE):
                 x1 = MARGE_GAUCHE_DROITE + j * TAILLE_CASE
@@ -88,16 +35,85 @@ def partie_en_cours(grille, tour, nb_joueurs, taille_grille, couleurs):
     def placer_pion(grille, ligne, colonne, couleur):
         grille[ligne][colonne] = couleur
 
-    def tabScore(grille, couleurs):
-        score = [0] * len(couleurs)
-        for i in range(TAILLE_GRILLE):
-            for j in range(TAILLE_GRILLE):
+    def tabScore(grille, lenGrille, couleurs):
+        score = [0, 0, 0, 0]
+        for i in range(lenGrille):
+            for j in range(lenGrille):
                 if grille[i][j] is not None:  # Si la case n'est pas vide
                     index = couleurs.index(grille[i][j])  # On récupère l'index de la couleur
                     score[index] += 1  # On incrémente le score
 
         return score
-    
+
+    def affichageScore(score, couleursTab, grille, TAILLE_GRILLE):
+        coul = changerCouleur(grille, TAILLE_GRILLE, couleursTab)
+        rectangle(bordureDroite, 4, LARGEUR_FENETRE - 1, TAILLE_CASE + 4, couleur="black", remplissage=coul[1])
+        rectangle(bordureDroite, TAILLE_CASE + 4, LARGEUR_FENETRE - 1, HAUTEUR_FENETRE - 4, couleur="black",
+                  remplissage=coul[0])
+        texte((LARGEUR_FENETRE + bordureDroite) // 2, 32, "Scores", police="Arial", taille=20, ancrage="center")
+        scoreTrie = []
+
+        for i, (s, c) in enumerate(zip(score, couleursTab)):
+            scoreTrie.append((s, c))
+
+        scoreTrie.sort(reverse=True)
+
+        for  i in range(len(scoreTrie)):
+            image((LARGEUR_FENETRE + bordureDroite) // 2 - 60, 70 + i * 60, scoreTrie[i][1], largeur=50, hauteur=50,
+                  ancrage="nw")
+            texte((LARGEUR_FENETRE + bordureDroite) // 2 + 20, 80 + i * 60, str(scoreTrie[i][0]), police="Arial", taille=20,
+                  ancrage="nw")
+
+    def affichageGauche(couleurs, nb_joueurs, tour, lenGrille, grille):
+        coul = changerCouleur(grille, lenGrille, couleurs)
+        # Rectangle en haut à gauche
+        rectangle(0, 4, MARGE_GAUCHE_DROITE, TAILLE_CASE+4, couleur="black", remplissage=coul[1])
+
+        couleur = couleurs[tour % nb_joueurs]
+
+        texte(MARGE_GAUCHE_DROITE // 2 - 30, 32, f"Tour :", police="Arial", taille=20, ancrage="center")
+        image(MARGE_GAUCHE_DROITE // 2 + 30, 32, couleur, largeur=50, hauteur=50, ancrage="center")
+
+        # Rectangle en bas à gauche
+        rectangle(0, HAUTEUR_FENETRE-TAILLE_CASE-4, MARGE_GAUCHE_DROITE, HAUTEUR_FENETRE-4, couleur="black", remplissage=coul[1])
+
+        texte(MARGE_GAUCHE_DROITE // 2, HAUTEUR_FENETRE - 32, f"{tour + nb_joueurs} / {lenGrille ** 2}", police="Arial",
+              taille=20, ancrage="center")
+
+        # Vide
+        rectangle(0, TAILLE_CASE+4, MARGE_GAUCHE_DROITE, HAUTEUR_FENETRE-TAILLE_CASE-4, couleur="black",
+                  remplissage=coul[0])
+
+        # Bouton sauvegarde
+        rectangle(15, (HAUTEUR_FENETRE // 2) - 35, MARGE_GAUCHE_DROITE - 15, (HAUTEUR_FENETRE // 2) + 35,
+                  couleur="black",
+                  remplissage='pink')
+        texte(MARGE_GAUCHE_DROITE // 2, (HAUTEUR_FENETRE // 2), f"SAUVEGARDER", police="Arial", taille=15,
+              ancrage="center")
+
+    # Vérification dans une direction (optimisée)
+    def verifier_direction(grille, ligne, colonne, couleur, d_l, d_c):
+        a_encadrer = []
+        l, c = ligne + d_l, colonne + d_c
+        while 0 <= l < TAILLE_GRILLE and 0 <= c < TAILLE_GRILLE:
+            case = grille[l][c]
+            if case is None:  # Si vide, arrêt
+                return []
+            if case == couleur:  # Si couleur identique, valide
+                return a_encadrer
+            a_encadrer.append((l, c))
+            l, c = l + d_l, c + d_c
+        return []
+
+    # Encadrer les pions
+    def encadrer_pions(grille, ligne, colonne, couleur):
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
+        for d_l, d_c in directions:
+            a_encadrer = verifier_direction(grille, ligne, colonne, couleur, d_l, d_c)
+            for l, c in a_encadrer:
+                grille[l][c] = couleur
+
+
     def bouleNextTo(grille, ligne, colonne):
         directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]  # 8 directions possibles
         for d_l, d_c in directions:
@@ -106,35 +122,22 @@ def partie_en_cours(grille, tour, nb_joueurs, taille_grille, couleurs):
                     return True
         return False
 
-    def affichageScore(score, couleurs):
-        rectangle(bordureDroite, 4, LARGEUR_FENETRE - 1, TAILLE_CASE + 4, couleur="black", remplissage="#ECCFC3")
-        rectangle(bordureDroite, TAILLE_CASE + 4, LARGEUR_FENETRE - 1, HAUTEUR_FENETRE - 4, couleur="black", remplissage="#ECCFC3")
-        texte((LARGEUR_FENETRE + bordureDroite) // 2, 32, "Scores", police="Arial", taille=20, ancrage="center")
-        scoreTrie = sorted(zip(score, couleurs), reverse=True)
-
-        for i, (s, c) in enumerate(scoreTrie):
-            image((LARGEUR_FENETRE + bordureDroite) // 2 - 60, 70 + i * 60, c, largeur=50, hauteur=50, ancrage="nw")
-            texte((LARGEUR_FENETRE + bordureDroite) // 2 + 20, 80 + i * 60, str(s), police="Arial", taille=20, ancrage="nw")
-
-    def affichageGauche(couleurs, nb_joueurs, tour):
-        couleur = couleurs[tour % nb_joueurs]
-        rectangle(0, 4, MARGE_GAUCHE_DROITE, TAILLE_CASE + 4, couleur="black", remplissage="#ECCFC3")
-        texte(MARGE_GAUCHE_DROITE // 2 - 30, 32, f"Tour :", police="Arial", taille=20, ancrage="center")
-        image(MARGE_GAUCHE_DROITE // 2 + 30, 32, couleur, largeur=50, hauteur=50, ancrage="center")
-
-        rectangle(0, HAUTEUR_FENETRE - TAILLE_CASE - 4, MARGE_GAUCHE_DROITE, HAUTEUR_FENETRE - 4, couleur="black", remplissage="#ECCFC3")
-        texte(MARGE_GAUCHE_DROITE // 2, HAUTEUR_FENETRE - 32, f"{tour + nb_joueurs} / {TAILLE_GRILLE ** 2}", police="Arial", taille=20, ancrage="center")
-
-    def fin(tour, grille, nb_joueurs):
-        if tour == (TAILLE_GRILLE ** 2) - nb_joueurs:
-            score = tabScore(grille, couleurs)
-            scoreTrie = sorted(zip(score, couleurs), reverse=True)
+    def fin(tour, grille, lenGrille, couleurs, nb_joueurs):
+        if tour == (lenGrille**2) - nb_joueurs:
+            score = tabScore(grille, lenGrille, couleurs)
+            scoreTrie = []
+            for i, (s, c) in enumerate(zip(score, couleurs)):
+                scoreTrie.append((s, c))
+            scoreTrie.sort(reverse=True)
             return (True, scoreTrie[0])  # Retourne True et le gagnant
         return (False, None)  # Sinon, continue le jeu
 
-    def changerCouleur(grille, couleurs):
-        score = tabScore(grille, couleurs)
-        scoreTrie = sorted(zip(score, couleurs), reverse=True)
+    def changerCouleur(grille, lenGrille, couleurs):
+        score = tabScore(grille, lenGrille, couleurs)
+        scoreTrie = []
+        for i, (s, c) in enumerate(zip(score, couleurs)):
+            scoreTrie.append((s, c))
+        scoreTrie.sort(reverse=True)
         if scoreTrie[0][1] == "assets/pionRouge.png":
             return ("#ECCFC3", "#ECB8A5")
         elif scoreTrie[0][1] == "assets/pionBleu.png":
@@ -149,8 +152,54 @@ def partie_en_cours(grille, tour, nb_joueurs, taille_grille, couleurs):
     def affichageV(gagnant):
         texte(LARGEUR_FENETRE // 2, HAUTEUR_FENETRE // 2, f"Le gagnant est {gagnant[1]}", police="Arial", taille=30, ancrage="center")
 
-    def jouer(tour):  # Passer tour en paramètre ici
-        while fin(tour, grille, nb_joueurs)[0] is not True:
+
+    def sauv(tour, grille, tev, ev, nb_parties):
+        """
+        Fonction qui permet de réaliser la sauvegarde d'une partie
+        :param tour: Tour actuel de la partie
+        :param grille: État de la grille
+        :param tev: Type d'événement
+        :param ev: Événement
+        :param nb_parties: Numéro de la partie
+        """
+        if tev == "ClicGauche":
+            x, y = abscisse(ev), ordonnee(ev)
+            # Si le joueur clique sur le bouton sauvegarder
+            if 15 <= x <= MARGE_GAUCHE_DROITE - 15 and (HAUTEUR_FENETRE // 2) - 35 <= y <= (HAUTEUR_FENETRE // 2) + 35:
+                # Déterminer le chemin du dossier de sauvegarde
+                save_folder_path = os.path.expanduser("~/sauvegarde")
+
+                # S'assurer que le dossier existe
+                os.makedirs(save_folder_path, exist_ok=True)
+
+                # Construire le chemin complet du fichier de sauvegarde
+                save_file_path = os.path.join(save_folder_path, f"sauvegarde_partie{nb_parties}.txt")
+
+                # Les informations de la partie sont enregistrées dans un fichier texte
+                with open(save_file_path, 'w', encoding='utf8') as sauvegarde:
+                    nb_parties += 1
+                    sauvegarde.write(str(grille) + '\n')
+                    sauvegarde.write(str(tour) + '\n')
+                    sauvegarde.write(str(nb_joueurs) + '\n')
+                    sauvegarde.write(str(taille_grille) + '\n')
+                    sauvegarde.write(str(COULEURS))
+                    ferme_fenetre()
+
+
+
+
+    def jouer():
+        grille = creer_grille()
+        tour = 0
+        milieu = TAILLE_GRILLE // 2
+
+        # Placement initial
+        positions = [(milieu - 1, milieu - 1), (milieu, milieu),
+                     (milieu - 1, milieu), (milieu, milieu - 1)]
+        for i, (l, c) in enumerate(positions[:nb_joueurs]):
+            placer_pion(grille, l, c, COULEURS[i])
+
+        while fin(tour, grille, TAILLE_GRILLE, COULEURS, nb_joueurs)[0] is not True:
             ev = donne_ev()
             tev = type_ev(ev)
 
@@ -160,23 +209,24 @@ def partie_en_cours(grille, tour, nb_joueurs, taille_grille, couleurs):
                 x, y = abscisse(ev), ordonnee(ev)
                 ligne, colonne = (y - 4) // TAILLE_CASE, (x - MARGE_GAUCHE_DROITE) // TAILLE_CASE
                 if 0 <= ligne < TAILLE_GRILLE and 0 <= colonne < TAILLE_GRILLE:
-                    if grille[ligne][colonne] is None:
-                        if bouleNextTo(grille, ligne, colonne):# Si la case est vide
-                            couleur = couleurs[tour % nb_joueurs]
+                    if grille[ligne][colonne] is None:  # Si la case est vide
+                        couleur = COULEURS[tour % nb_joueurs]
+                        if bouleNextTo(grille, ligne, colonne):
                             placer_pion(grille, ligne, colonne, couleur)
+                            encadrer_pions(grille, ligne, colonne, couleur)
                             tour += 1
             efface_tout()
-            dessiner_grille(grille, couleurs)
-            affichageScore(tabScore(grille, couleurs), couleurs)
-            affichageGauche(couleurs, nb_joueurs, tour)
+            dessiner_grille(grille, TAILLE_GRILLE, COULEURS)
+            affichageScore(tabScore(grille, TAILLE_GRILLE, COULEURS), COULEURS, grille, TAILLE_GRILLE)
+            affichageGauche(COULEURS, nb_joueurs, tour, TAILLE_GRILLE, grille)
+            sauv(tour, grille, tev, ev, nb_parties)
             mise_a_jour()
 
         ferme_fenetre()
+
         cree_fenetre(LARGEUR_FENETRE, HAUTEUR_FENETRE)
-        affichageV(fin(tour, grille, nb_joueurs)[1])
+        affichageV(fin(tour, grille, TAILLE_GRILLE, COULEURS, nb_joueurs)[1])
         attend_ev()
 
-    # Lancer la partie en cours
-    jouer(tour)
-
-
+    # Lancer le jeu
+    jouer()
