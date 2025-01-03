@@ -246,7 +246,7 @@ def jouer():
     attend_ev()
 
 # Lancement du jeu
-jouer()
+#jouer()
 
 
 

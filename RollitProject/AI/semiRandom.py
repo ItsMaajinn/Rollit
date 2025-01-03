@@ -1,6 +1,6 @@
+from random import randint, random
 import copy
 from fltk import *
-
 
 # Interface pour choisir le nombre de joueurs
 nb_joueurs = 2
@@ -110,12 +110,6 @@ def bouleNextTo(grille, ligne, colonne):
 
 
 def coups_possibles(grille, couleurs):
-    """
-    Fonction qui retourne les coups possibles
-    :param grille:
-    :param couleurs:
-    :return:
-    """
     coups = []
     for i in range(TAILLE_GRILLE):
         for j in range(TAILLE_GRILLE):
@@ -125,13 +119,6 @@ def coups_possibles(grille, couleurs):
     return coups
 
 def simuler_coups(grille, coup, couleur):
-    """
-    Fonction qui simule un coup
-    :param grille:
-    :param coup:
-    :param couleur:
-    :return:
-    """
     copie = copy.deepcopy(grille)
     ligne, colonne = coup
     placer_pion(copie, ligne, colonne, couleur)
@@ -142,13 +129,6 @@ def simuler_coups(grille, coup, couleur):
 
 
 def evaluation(grille, couleurs, lenGrille):
-    """
-    Fonction qui évalue la grille
-    :param grille:
-    :param couleurs:
-    :param lenGrille:
-    :return:
-    """
     scores = tabScore(grille, lenGrille, couleurs)
     scoreIA = scores[1]
     scoreJoueur = scores[0]
@@ -162,15 +142,6 @@ def fin(grille):
 
 
 def minimax(grille, profondeur, maximisant, couleurs, lenGrille):
-    """
-    Fonction qui implémente l'algorithme minimax
-    :param grille:
-    :param profondeur:
-    :param maximisant:
-    :param couleurs:
-    :param lenGrille:
-    :return:
-    """
     # Conditions d'arrêt
     if profondeur == 0 or fin(grille):
         return evaluation(grille, couleurs, lenGrille), None
@@ -259,7 +230,7 @@ def affichageGauche(couleurs, nb_joueurs, tour, lenGrille, grille):
               remplissage=coul[0])
 
 
-def jouer():
+def lvl2():
     cree_fenetre(LARGEUR_FENETRE, HAUTEUR_FENETRE)
     grille = creer_grille()
 
@@ -277,6 +248,7 @@ def jouer():
         if tev == "Quitte":
             break
         if tour % 2 == 0:
+            # Tour du joueur humain
             if tev == "ClicGauche":
                 x, y = abscisse(ev), ordonnee(ev)
                 ligne, colonne = (y - 4) // TAILLE_CASE, (x - MARGE_GAUCHE_DROITE) // TAILLE_CASE
@@ -288,14 +260,24 @@ def jouer():
                             encadrer_pions(grille, ligne, colonne, couleur)
                             tour += 1  # Prochain joueur
         else:
-            score, coup = minimax(grille, 3, True, COULEURS, TAILLE_GRILLE)
-            grille = simuler_coups(grille, coup, COULEURS[1])
+            # Tour de l'IA
+            if random() < 0.5:  # 50 % de chance d'utiliser Minimax
+                score, coup = minimax(grille, 3, True, COULEURS, TAILLE_GRILLE)
+                if coup:
+                    grille = simuler_coups(grille, coup, COULEURS[1])
+            else:  # 50 % de chance d'utiliser un coup aléatoire
+                coups = coups_possibles(grille, COULEURS)
+                if coups:
+                    coup = coups[randint(0, len(coups) - 1)]
+                    ligne, colonne = coup
+                    placer_pion(grille, ligne, colonne, COULEURS[1])
+                    encadrer_pions(grille, ligne, colonne, COULEURS[1])
             tour += 1
+
         efface_tout()
         dessiner_grille(grille, TAILLE_GRILLE, COULEURS)
         affichageScore(tabScore(grille, TAILLE_GRILLE, COULEURS), COULEURS, grille, TAILLE_GRILLE)
         affichageGauche(COULEURS, nb_joueurs, tour, TAILLE_GRILLE, grille)
         mise_a_jour()
 
-
-jouer()
+#jouer()

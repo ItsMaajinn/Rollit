@@ -259,7 +259,7 @@ def affichageGauche(couleurs, nb_joueurs, tour, lenGrille, grille):
               remplissage=coul[0])
 
 
-def jouer():
+def lvl3():
     cree_fenetre(LARGEUR_FENETRE, HAUTEUR_FENETRE)
     grille = creer_grille()
 
@@ -298,4 +298,4 @@ def jouer():
         mise_a_jour()
 
 
-jouer()
+#jouer()
